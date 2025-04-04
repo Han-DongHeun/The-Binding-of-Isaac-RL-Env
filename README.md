@@ -25,6 +25,7 @@ Run `main.py`
 Credits
 -------
 This code is originated from https://github.com/exPHAT/binding-of-isaac.
+
 This project was created by [IIIXR LAB](https://iiixr.korea.ac.kr/):
 * Han DongHeun
 * Kim KyeongMin
