@@ -1,4 +1,4 @@
-binding-of-isaac
+The-Binding-of-Isaac-RL-Env
 ================
 
 We are currently working on a project. It is still under development and not yet ready to run.
