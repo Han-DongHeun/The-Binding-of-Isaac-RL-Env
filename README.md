@@ -1,8 +1,7 @@
 binding-of-isaac
 ================
 
-ICS3U final project.
-
+We are currently working on a project. It is still under development and not yet ready to run.
 
 ![Title Screen](https://raw.githubusercontent.com/ExPHAT/binding-of-isaac/master/screenshots/title.png)
 ![First Floor](https://raw.githubusercontent.com/ExPHAT/binding-of-isaac/master/screenshots/floor1.png)
@@ -25,7 +24,7 @@ Run `main.py`
 
 Credits
 -------
-
-This project was created by:
-* Aaron Taylor
-* Mustafa Abumeeiz
+This code is originated from https://github.com/exPHAT/binding-of-isaac.
+This project was created by [IIIXR LAB](https://iiixr.korea.ac.kr/):
+* Han DongHeun
+* Kim KyeongMin
