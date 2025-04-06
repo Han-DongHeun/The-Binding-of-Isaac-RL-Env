@@ -5,13 +5,15 @@ save-1.dat
 save-2.dat
 save-3.dat
 
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 
 # C extensions
 *.so
+
+# IntelliJ IDEA / JetBrains IDE specific files
+.idea/
 
 # Distribution / packaging
 .Python
@@ -63,3 +65,71 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Operating System generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Other common IDEs / Editors configuration files
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+.buildpath
+*~
+*.swp
+*.swo
+
+# Virtual Environments (more common names)
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Secrets / Credentials (IMPORTANT - Never commit these)
+.env* # Matches .env, .env.local, .env.development etc. (Be careful not to ignore essential ones if used differently)
+*.pem
+*.key
+credentials.*
+secrets.*
+config.local.py # Common pattern for local overrides
+local_settings.py # Common pattern for local overrides
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Local databases (if not intended to be version controlled)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal # SQLite rollback journal
+
+# Local log directories (if separate from *.log files)
+logs/
+log/
+
+# User-uploaded files (common in web apps)
+media/
+uploads/
+
+# Temporary files / Backup files
+*.tmp
+*.bak
+*.old
+
+# MyPy cache
+.mypy_cache/
+
+# Ruff cache
+.ruff_cache/
+
+# pytest cache
+.pytest_cache/
