@@ -177,6 +177,14 @@ textures["coins"] = {
 textures["bombs"]["explosion"] = [textures["bombs"]["explosion"].subsurface(192 * (i % 4), 192 * (i // 4), 192, 192) for i in range(12)]
 textures["bombs"]["smut"] = [textures["bombs"]["smut"].subsurface(192*x, 128*y, 192, 128) for x, y in ((0, 0), (1, 0), (0, 1), (1, 1))]
 
+textures["enemies"].update({
+	"fly" : [textures["enemies"]["fly"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
+	"pooter" : [textures["enemies"]["pooter"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
+	"boil" : [textures["enemies"]["boil"].subsurface(64 * (i % 4), 64 * (i // 4), 64, 64) for i in reversed(range(10))],
+	"host" : [textures["enemies"]["host"].subsurface(i*64, 0, 64, 128) for i in range(2)],
+	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)]
+})
+
 def resizing(textures):
 	if isinstance(textures, Surface):
 		w = textures.get_width() * SIZING

@@ -29,8 +29,7 @@ class Tear:
 		# sounds
 		self.sounds = sounds
 
-		self.x = round(xy[0])
-		self.y = round(xy[1])
+		self.x, self.y = xy
 		self.h = 15
 
 		# Inherited x and y velocity

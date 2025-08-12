@@ -146,15 +146,15 @@ class Room:
 				elif typ == 5 and var == 40:
 					self.other.append(Bomb(0, (x, y), [self.sounds["explosion"]], self.textures["bombs"]))
 				elif typ == 13:
-					self.enemies.append(Fly((x,y), [self.sounds["deathBurst"]], self.textures["enemies"]["fly"]))
+					self.enemies.append(Fly((x,y), self.textures["enemies"]["fly"], self.textures["tears"], self.sounds["tear"]))
 				elif typ == 14:
-					self.enemies.append(Pooter((x, y), self.sounds, self.textures))
+					self.enemies.append(Pooter((x, y), self.textures["enemies"]["pooter"], self.textures["tears"], self.sounds["tear"]))
 				elif typ == 26:
-					self.enemies.append(Maw((x, y), [self.sounds["deathBurst"]], self.textures["enemies"]["maw"]))
+					self.enemies.append(Maw((x, y), self.textures["enemies"]["maw"], self.textures["tears"], self.sounds["tear"]))
 				elif typ == 27:
-					self.enemies.append(Host((x, y), self.sounds, self.textures))
+					self.enemies.append(Host((x, y), self.textures["enemies"]["host"], self.textures["tears"], self.sounds["tear"]))
 				elif typ == 30:
-					self.enemies.append(Boil((x, y), self.sounds, self.textures))
+					self.enemies.append(Boil((x, y), self.textures["enemies"]["boil"], self.textures["tears"], self.sounds["tear"]))
 
 	def addDoor(self, door_idx, variant):
 		self.doors.append(Door(self.floor, door_idx, variant, True, self.textures["doors"], self.sounds))
@@ -276,15 +276,7 @@ class Room:
 					self.other.remove(other)
 
 			everything = objects+self.other
-
-			# Character x and y
-			cx, cy = int((character.x-GRIDX)/GRATIO), int((character.y-GRIDY)/GRATIO)
 			
-			if cx != self.lcx or cy != self.lcy:
-				self.lcx, self.lcy = cx, cy
-				for enemy in self.enemies:
-					enemy.pathFind((cx,cy), self.nodes, self.paths)
-
 			for enemy in self.enemies[:]:
 				if not enemy.render(surface, currTime, character, self.nodes, self.paths, self.levelBounds, objects):
 					self.enemies.remove(enemy)

@@ -25,7 +25,7 @@ from Menu.Banner import *
 class Character:
 	"""The main class for Isaac"""
 
-	hurtDistance = .6
+	hurtDistance = .6 * SIZING
 
 	def __init__(self, variant, xy, controls, textures, sounds, fonts):
 		self.variant = variant

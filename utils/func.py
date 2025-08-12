@@ -7,11 +7,9 @@
 
 import xml.etree.ElementTree as xml
 import os
-from Enemy.Gurdy import *
 from Item.Heart import *
 from Item.PHD import *
 from Item.Pill import *
-from Enemy.Duke import *
 
 alph = "abcdefghijklmnopqrstuvwxyz0123456789 "
 
@@ -70,6 +68,9 @@ def findRooms(floor, possibleCoords, rooms):
 
 def loadFloor(name, index, size, sounds, textures):
 	from Room.Room import Room
+	from Enemy.Gurdy import Gurdy
+	from Enemy.Duke import Duke
+
 	d = xml.parse(os.path.join('res', 'floors', name)).getroot()
 
 	floor = {}
@@ -299,3 +300,6 @@ def get_center(x=6, y=3):
 	centerx = GRIDX + (x + 0.5) * GRATIO
 	centery = GRIDY + (y + 0.5) * GRATIO
 	return (centerx, centery)
+
+def clamp(v, min_v, max_v):
+	return max(min_v, min(max_v, v))
