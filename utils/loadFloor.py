@@ -16,7 +16,7 @@ def loadRoom(room_type='basement'):
     random_room_file = random.choice(map_files)
     file_name = os.path.join(room_folder, random_room_file)
 
-    tmx_data = pytmx.load_pygame(file_name, pixelalpha=True)
+    tmx_data = pytmx.TiledMap(file_name)
 
     types = ('obstacle', 'pickup', 'enemy')
     datas = {t : [] for t in types}
@@ -30,8 +30,10 @@ def loadRoom(room_type='basement'):
 
         tile_type = properties.get('type')
         tile_name = properties.get('name')
-
-        datas[tile_type].append((tile_name, x, y))
+        try:
+            datas[tile_type].append((tile_name, x, y))
+        except:
+            pass
 
     return datas
 

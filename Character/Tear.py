@@ -64,8 +64,9 @@ class Tear:
 			self.sounds[1].play() # Play normal pop
 		return True
 
-	def render(self, surface, time, bounds, obsticals):
+	def render(self, surface, bounds, obsticals):
 		if self.poped:
+			return True
 			# Return popping tear
 			frame = self.popping.render(time)
 			if self.popping.looped:

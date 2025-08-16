@@ -5,11 +5,9 @@
 # This file contains a many functions that are used throught the game
 # 
 
-import xml.etree.ElementTree as xml
 import os
-from Pickup.Heart import *
-from Pickup.PHD import *
-from Pickup.Pill import *
+from utils.const import *
+from random import randint
 
 def generateSeed():
 	# Create random level seed

@@ -8,20 +8,19 @@
 
 from pygame import *
 from utils.const import *
-from utils.Animation import *
 from Pickup.Pickup import *
 import utils.func as func
+
+from utils.loadResource import textures, sounds
 
 class Heart(Pickup):
 	"""Pickup Heart class"""
 
 	health = 2
-	
-	def __init__(self, variant, xy, sound, textures):
-		sound = sound[[0,1,0][variant]]
-		super().__init__(xy, sound, textures[variant])
 
-		self.variant = variant
+	variant = 0
+	sound = sounds["heartIntake"]
+	texture = textures["pickupHearts"][variant]
 
 class UIHeart:
 	"""Class for a UI heart"""

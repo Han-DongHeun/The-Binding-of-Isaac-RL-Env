@@ -99,7 +99,7 @@ class Character:
 		self.tear_idx = None
 
 		# The Pickups isaac has picked up
-		self.Pickups = []
+		self.pickups = []
 
 	def heal(self, ammount, variant):
 		# Heal character
@@ -267,7 +267,7 @@ class Character:
 		else:
 			self.head = self.heads[0]
 
-	def render(self, surface, time, bounds, obsticals, doors):
+	def render(self, surface, bounds, obsticals, pickups, doors):
 		move = [0, 0] # Which direction on the map to move
 
 		# Move feet when necesarry
@@ -292,7 +292,7 @@ class Character:
 		inBoundsX = bounds.collidepoint(self.x+dx, self.y)
 		inBoundsY = bounds.collidepoint(self.x, self.y+dy)
 
-		for ob in obsticals:
+		for ob in obsticals + pickups:
 			# Collide with ob
 			try:
 				if ob.destroyed:
@@ -338,7 +338,7 @@ class Character:
 					ob.pickup()
 			elif type(ob) == PHD:
 				if self.pickups[0].use(ob.price):
-					self.Pickups.append(ob)
+					self.pickups.append(ob)
 					ob.pickup()
 			elif type(ob) == Trapdoor:
 				self.game.floorIndex += 1
@@ -426,7 +426,7 @@ class Character:
 
 		# Render tears
 		for tear in self.tears[:]:
-			if not tear.render(surface, time, bounds, obsticals):
+			if not tear.render(surface, bounds, obsticals):
 				self.tears.remove(tear)
 
 		for i in range(len(self.hearts)):
@@ -438,8 +438,8 @@ class Character:
 		if self.pill != None:
 			surface.blit(self.pill.texture, (WIDTH-80, HEIGHT-60))
 
-		for Pickup in self.Pickups:
-			Pickup.renderCorner(surface)
+		for pickup in self.pickups:
+			pickup.renderCorner(surface)
 
 		self.current_frame += 1
 		self.hurt_timer = max(0, self.hurt_timer - 1)

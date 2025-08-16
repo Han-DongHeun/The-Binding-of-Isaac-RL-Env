@@ -25,6 +25,8 @@ class Door:
 	# ROOMS ARE 13 x 7
 
 	def __init__(self, floor, side, variant, isOpen, texture, sounds):
+		if side & 1 == 0:
+			side ^= 2 #임시 코드
 		self.side = side
 		self.variant = variant
 		self.locked = False

@@ -140,14 +140,14 @@ class Game:
 			# Draw animating rooms (The ones that are shifting in and out of frame)
 			if len(animatingRooms) > 0:
 				for r in animatingRooms[:]:
-					r.render(screen, isaac, currTime)
+					r.render(screen, isaac)
 					if not r.animating:
 						animatingRooms.remove(r)
 			else:
 				screen.fill((0,0,0))
 
 				# Render the room
-				move = self.floor[self.currentRoom].render(screen, isaac, currTime)
+				move = self.floor[self.currentRoom].render(screen, isaac)
 				next_x = move[0] + self.currentRoom[0]
 				next_y = move[1] + self.currentRoom[1]
 				nextRoom = (next_x, next_y)

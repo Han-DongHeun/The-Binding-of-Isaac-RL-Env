@@ -7,16 +7,12 @@
 # 
 
 from pygame import *
-from utils.const import *
-from utils.Animation import *
 from Pickup.Pickup import *
+from utils.loadResource import textures, sounds 
 
 class Key(Pickup):
 	"""Pickup Key class"""
 
-	def __init__(self, variant, xy, sounds, textures):
-		sound = sounds[1]
-		texture = textures
-		super().__init__(xy, sound, texture)
-
-		self.variant = variant
+	variant = 0
+	texture = textures["keys"]
+	sound = sounds["keyPickup"]

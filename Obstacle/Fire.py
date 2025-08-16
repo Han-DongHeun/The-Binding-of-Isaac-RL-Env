@@ -43,14 +43,14 @@ class Fire(Obstacle):
 
 		self.update()
 
-		fire_rect = Rect(0, 0, self.fire.width, self.fire.height)
-		wood_rect = Rect(0, 0, self.wood.width, self.wood.height)
+		fire_rect = Rect(0, 0, self.fire.get_width(), self.fire.get_height())
+		wood_rect = Rect(0, 0, self.wood.get_width(), self.wood.get_height())
 
 		fire_rect.midbottom = (self.bounds.centerx + ox, self.bounds.bottom + oy)
 		wood_rect.center = (self.bounds.centerx + ox, self.bounds.centery + oy)
 
-		surface.blit(self.fire, fire_rect)
 		surface.blit(self.wood, wood_rect)
+		surface.blit(self.fire, fire_rect)
 
 		self.current_frame += 1
 
@@ -63,7 +63,7 @@ class Fire(Obstacle):
 
 		fire_frames = self.fire_frames[clamp(self.health, 0, 4)]
 		fire_idx = self.current_frame // self.interval_frame % len(fire_frames)
-		wood_idx = self.current_frame // self.interval_frame % len(self.woodFrames)
+		wood_idx = self.current_frame // self.interval_frame % len(self.wood_frames)
 
-		self.fire = self.fire_frames[fire_idx]
+		self.fire = fire_frames[fire_idx]
 		self.wood = self.wood_frames[wood_idx]

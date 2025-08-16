@@ -11,12 +11,12 @@ from random import *
 from utils.const import *
 from Pickup.Pickup import *
 from Pickup.PHD import *
-import utils.func as func
+from utils.loadResource import textures
 
 class Pill(Pickup):
-	def __init__(self, xy, texture):
-		texture = texture.subsurface(randint(0,2)*64, randint(0,2)*64, 64, 64)
-		super().__init__(xy, None, texture)
+	def __init__(self, xy):
+		self.texture = textures["pills"].subsurface(randint(0,2)*64, randint(0,2)*64, 64, 64)
+		super().__init__(xy)
 
 	def use(self, character):
 		# Choose random affect and wether its positive or negative

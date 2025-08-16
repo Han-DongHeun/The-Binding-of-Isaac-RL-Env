@@ -145,7 +145,7 @@ class Enemy:
 				path[i] = (p.x, p.y)
 			self.path = path[1:]
 
-	def render(self, surface, time, character, nodes, paths, bounds, obsticals):
+	def render(self, surface, character, nodes, paths, bounds, obsticals):
 
 		self.cx, self.cy = character.x, character.y
 
@@ -170,5 +170,4 @@ class Enemy:
 		return not self.dead
 	
 	def update(self) -> Surface:
-		frame_index = self.current_frame // self.interval_frame % len(self.frames)
-		self.texture = self.frames[frame_index]
+		pass

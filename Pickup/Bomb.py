@@ -9,6 +9,7 @@ from pygame import *
 from math import *
 from utils.Animation import *
 from Pickup.Pickup import *
+from utils.loadResource import textures, sounds
 
 class Bomb(Pickup):
 	"""Droppable bomb class"""
@@ -16,7 +17,7 @@ class Bomb(Pickup):
 	exploded = False
 	fuse = 2
 
-	tex
+	texture = textures["bombs"]["bombs"]
 
 	def pickup(self):
 		self.pickedUp = True

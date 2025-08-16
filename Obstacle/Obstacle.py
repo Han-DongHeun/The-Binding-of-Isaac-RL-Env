@@ -42,7 +42,7 @@ class Obstacle:
     def render(self, surface, ox=0, oy=0):
         self.update()
         rect = self.texture.get_rect(center=(self.x + ox, self.y + oy))
-        surface.bilt(self.texture, rect)
+        surface.blit(self.texture, rect)
 
     def update(self):
         pass
