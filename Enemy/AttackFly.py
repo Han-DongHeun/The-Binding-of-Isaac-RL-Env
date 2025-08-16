@@ -1,15 +1,8 @@
-# Fly.py
-# Aaron Taylor
-# Moose Abumeeiz
-#
-# This class is for the simple fly that just heads towards isaac.
-# 
-
 from pygame import *
 from utils.const import *
 from Enemy.Enemy import Enemy
 
-class Fly(Enemy):
+class AttackFly(Enemy):
 	"""Simple enemy fly class"""
 
 	isFlying = True

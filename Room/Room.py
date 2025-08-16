@@ -10,24 +10,16 @@
 from pygame import *
 from utils.const import *
 from random import *
-from Room.Rock import *
-from Room.Poop import *
-from Room.Fire import *
 from Room.Door import *
-from Character.Tear import *
-from Item.Coin import *
-from Item.Key import *
-from Enemy.Fly import *
-from Enemy.Pooter import *
-from Item.Heart import *
-from Item.Bomb import *
-from Item.Pill import *
-from Room.Trapdoor import *
-from Enemy.Maw import *
-from Enemy.Boil import *
-from Enemy.Host import *
+from Obstacle.Obstacle import Obstacle
+from Enemy.Enemy import Enemy
+from Pickup.Pickup import Pickup
 
 import utils.func as func
+from utils.AStar import *
+import importlib
+
+from utils.loadResource import textures, sounds, darken
 
 class Room:
 	"""The main floor class"""
@@ -43,36 +35,27 @@ class Room:
 
 	# ROOMS ARE 13 x 7
 
-	lcx = -1
-	lcy = -1
+	def __init__(self, floor, xy, objects, variant=0):
+		texture = textures["floors"][floor]
 
-	def __init__(self, floor, variant, xy, xml, textures, sounds):
-		offX = offY = 0
-		if variant == 2:
-			offX, offY = 234*2, 156*2
-
-		if variant == 5:
-			texture = textures["floors"]["shop"].subsurface(Rect(offX, offY, 221*2*SIZING, 143*2*SIZING))
-		else:
-			texture = textures["floors"][floor].subsurface(Rect(offX, offY, 221*2*SIZING, 143*2*SIZING))
-
-		backdrop = Surface((221*2*2*SIZING, 143*2*2*SIZING))
+		w, h = texture.get_width(), texture.get_height()
+		backdrop = Surface((w * 2, h * 2))
 
 		# Form the texture to each of the 4 corners of the room
 		backdrop.blit(texture, (0,0))
-		backdrop.blit(transform.flip(texture, True, False), (221*2*SIZING, 0))
-		backdrop.blit(transform.flip(texture, False, True), (0, 143*2*SIZING))
-		backdrop.blit(transform.flip(texture, True, True), (221*2*SIZING, 143*2*SIZING))
+		backdrop.blit(transform.flip(texture, True, False), (w, 0))
+		backdrop.blit(transform.flip(texture, False, True), (0, h))
+		backdrop.blit(transform.flip(texture, True, True), (w, h))
 
 		# Add gorgeous lighting
 		backdrop.blit(textures["shading"], (0,0))
-		backdrop = func.darken(backdrop, .25)
+		backdrop = darken(backdrop, .25)
 		backdrop.blit(textures["overlays"][randint(0,4)], (0,0))
 
 		self.backdrop_rect = backdrop.get_rect(center=(WIDTH//2, HEIGHT//2))
 
 		# Show tutorial controls if its the first room
-		if floor == 0 and xy[0] == 0 and xy[1] == 0:
+		if xy == (0, 0):
 			controls = textures["controls"]
 			controls_rect = controls.get_rect(center=(self.backdrop_rect.width//2, self.backdrop_rect.height//2))
 			backdrop.blit(controls, controls_rect)
@@ -96,65 +79,30 @@ class Room:
 		self.aDirection = -1
 		self.sx, self.sy = 0,0
 
-		self.levelBounds = Rect(GRIDX, GRIDY, WIDTH-(GRIDX*2), HEIGHT-(GRIDY*2))
+		self.levelBounds = Rect(GRIDX, GRIDY, 13 * GRATIO, 7 * GRATIO)
 
-		self.enemies = []
-		self.rocks = []
-		self.poops = []
-		self.fires = []
-		self.doors = []
-		self.other = [] # Other stuff that doesnt have special properties
+		self.enemies: list[Enemy] = []
+		self.obstacles: list[Obstacle] = []
+		self.doors: list[Door] = []
+		self.pickups: list[Pickup] = []
 
-		self.parseRoomXML(xml) # Build the room based on the xml
-
-		obsticals = []
-
-		for o in self.rocks+self.fires+self.poops:
-			obsticals.append([o.x, o.y])
+		self.generateObjects(objects)
 
 		# Setup room for path finding
-		graph, self.nodes = make_graph({"width": 13, "height": 7, "obstacle": obsticals})
+		graph, self.nodes = make_graph({"width": 13, "height": 7, "obstacle": self.obstacles})
 		self.paths = AStarGrid(graph)
-		self.hadEnemies = len(self.enemies) > 0
-		self.spawnedItem = False
 
-	def parseRoomXML(self, xml):
-		self.w, self.h = map(int, [xml.get('width'), xml.get('height')])
-		for obj in xml: # Iterate through room objects
-			attr = obj.attrib
-			x, y = int(attr["x"]), int(attr["y"])
+	def generateObjects(self, objects):
+		enemy = ('enemy', 'Enemy', self.enemies)
+		obstacle = ('obstacle', 'Obstacle', self.obstacles)
+		pickups = ('pickup', 'Pickup', self.pickups)
 
-			if obj.tag == "spawn":
-				
-				typ = int(obj[0].get('type'))
-				var = int(obj[0].get('variant'))
-				subtype = int(obj[0].get('subtype'))
-
-				# Spawn the correct item for the type
-				if typ in [1500, -1, -1, 1496, -1]:
-					self.poops.append(Poop([1500, -1, -1, 1496, -1].index(typ), (x,y), self.textures["poops"], self.sounds["pop"]))
-				elif typ == 1000:
-					self.rocks.append(Rock(randint(0,2), (x,y), False, self.sounds["rockBreak"], self.textures["rocks"]))
-				elif typ == 33:
-					self.fires.append(Fire(0, (x,y), [self.sounds["fireBurn"], self.sounds["steam"]], self.textures["fires"]))
-				elif typ == 5 and var == 10:
-					self.other.append(Heart([1,3,6].index(subtype), (x,y), [self.sounds["heartIntake"], self.sounds["holy"]], self.textures["pickupHearts"]))
-				elif typ == 5 and var == 20:
-					self.other.append(Coin(subtype - 1, (x,y), [self.sounds["coinDrop"], self.sounds["coinPickup"]], self.textures["coins"]))
-				elif typ == 5 and var == 30:
-					self.other.append(Key(0, (x, y), [self.sounds["keyDrop"], self.sounds["keyPickup"]], self.textures["keys"]))
-				elif typ == 5 and var == 40:
-					self.other.append(Bomb(0, (x, y), [self.sounds["explosion"]], self.textures["bombs"]))
-				elif typ == 13:
-					self.enemies.append(Fly((x,y), self.textures["enemies"]["fly"], self.textures["tears"], self.sounds["tear"]))
-				elif typ == 14:
-					self.enemies.append(Pooter((x, y), self.textures["enemies"]["pooter"], self.textures["tears"], self.sounds["tear"]))
-				elif typ == 26:
-					self.enemies.append(Maw((x, y), self.textures["enemies"]["maw"], self.textures["tears"], self.sounds["tear"]))
-				elif typ == 27:
-					self.enemies.append(Host((x, y), self.textures["enemies"]["host"], self.textures["tears"], self.sounds["tear"]))
-				elif typ == 30:
-					self.enemies.append(Boil((x, y), self.textures["enemies"]["boil"], self.textures["tears"], self.sounds["tear"]))
+		for type, path, repo in (enemy, obstacle, pickups):
+			for name, x, y in objects[type]:
+				name = name.capitalize()
+				object_module = importlib.import_module(f"{path}.{name}")
+				object_class = getattr(object_module, name)
+				repo.append(object_class((x, y)))
 
 	def addDoor(self, door_idx, variant):
 		self.doors.append(Door(self.floor, door_idx, variant, True, self.textures["doors"], self.sounds))
@@ -190,18 +138,15 @@ class Room:
 		self.ax, self.ay = [0, -1, 0, 1][self.aDirection] * WIDTH, [1, 0, -1, 0][self.aDirection] * HEIGHT
 		self.sx, self.sy = self.ax, self.ay
 
-	def step(self, currTime):
-		pass
-
 	def renderMap(self, minimap, currentRoom, detail):
-		ratio = 16 # Pixel to size ratio
+		ratio = 16 * SIZING # Pixel to size ratio
 		x, y = currentRoom
 
 		if self.x == x and self.y == y:
 			# Isaac is in this room
 			texture = self.textures["map"]["in"]
 		elif self.entered:
-			# Isaac has  this room
+			# Isaac has this room
 			texture = self.textures["map"]["entered"]
 		elif self.seen:
 			# Isaac has seen the door to the room
@@ -227,96 +172,39 @@ class Room:
 			if self.variant == 1 or self.variant == 2 and not self.x == x and self.y == y:
 				minimap.blit(self.textures["map"][["item", "boss"][self.variant-1]], room_rect)
 
-	def render(self, surface, character, currTime):
+	def render(self, surface, character):
 
 		if len(self.enemies) > 0:
 			for door in self.doors:
 				door.close()
-
 		else:
 			for door in self.doors:
 				door.open()
 
-			if self.hadEnemies and len(self.other) == 0 and randint(0,5) == 0 and not self.spawnedItem:
-				typ = randint(0,2)
-				self.spawnedItem = True
+		surface.blit(self.backdrop, self.backdrop_rect.move(self.ax, self.ay))
 
-				# Random spawn
-				if typ == 0:
-					self.other.append(Coin(0, (6,2), [self.sounds["coinDrop"], self.sounds["coinPickup"]], self.textures["coins"]))
-				elif typ == 1:
-					self.other.append(Bomb(1, (6,2), [self.sounds["explosion"]], self.textures["bombs"]))
-				elif typ == 2:
-					self.other.append(Key(0, (6, 2), [self.sounds["keyDrop"], self.sounds["keyPickup"]], self.textures["keys"]))
+		for door in self.doors:
+			door.render(surface, self.ax, self.ay)
 
-			# Create trapdoor in empty boss room
-			if self.variant == 2 and self.floor < 6 and not Trapdoor in list(map(type, self.other)):
-				self.other.append(Trapdoor(self.textures["trapdoor"]))
+		for obstacle in self.obstacles:
+			obstacle.render(surface, self.ax, self.ay)
+
+		self.pickups = [pickup for pickup in self.pickups if pickup.render(surface, self.ax, self.ay)]
 
 		if not self.animating:
-			# Render stationary room
-			surface.blit(self.backdrop, self.backdrop_rect)
-
-			for door in self.doors:
-				door.render(surface)
-
-			for rock in self.rocks:
-				rock.render(surface)
-
-			for poop in self.poops:
-				poop.render(surface)
-
-			for fire in self.fires:
-				fire.render(surface, currTime)
-
-			objects = self.rocks + self.poops + self.fires
-
-			for other in self.other[::-1]:
-				if not other.render(surface):
-					self.other.remove(other)
-
-			everything = objects+self.other
+			self.enemies = [enemy for enemy in self.enemies if enemy.render(surface, character, self.nodes, self.paths, self.levelBounds, self.obstacles)]
 			
-			for enemy in self.enemies[:]:
-				if not enemy.render(surface, currTime, character, self.nodes, self.paths, self.levelBounds, objects):
-					self.enemies.remove(enemy)
-
-			move = character.render(surface, currTime, self.levelBounds, everything, self.doors)
-
+			move = character.render(surface, self.levelBounds, self.obstacles, self.pickups, self.doors)
 			return move
+		
+		elif abs(self.sx - self.ax) >= WIDTH or abs(self.sy - self.ay) >= HEIGHT:
+			self.animating = False
+			self.ax, self.ay = 0, 0
+			self.sx, self.sy = 0, 0
+			return (0, 0)
+		
 		else:
-			# Render moving room
-
-			move_frame = 20 # How far the canvas should move
+			move_frame = 20
 			self.ax += [0, 1, 0, -1][self.aDirection] * WIDTH / move_frame
 			self.ay += [-1, 0, 1, 0][self.aDirection] * HEIGHT / move_frame
-
-			if abs(self.sx - self.ax) >= WIDTH or abs(self.sy - self.ay) >= HEIGHT:
-				self.animating = False
-				self.ax, self.ay = 0, 0
-				self.sx, self.sy = 0, 0
-			else:
-				backdrop_rect = self.backdrop_rect.copy()
-				backdrop_rect.x = self.backdrop_rect.x + self.ax
-				backdrop_rect.y = self.backdrop_rect.y + self.ay
-				surface.blit(self.backdrop, backdrop_rect)
-
-				for door in self.doors:
-					door.render(surface, ox=self.ax, oy=self.ay)
-
-				for rock in self.rocks:
-					rock.render(surface, ox=self.ax, oy=self.ay)
-
-				for poop in self.poops:
-					poop.render(surface, ox=self.ax, oy=self.ay)
-
-				for fire in self.fires:
-					fire.render(surface, currTime, ox=self.ax, oy=self.ay)
-
-				objects = self.rocks + self.poops + self.fires
-
-				for other in self.other[::-1]:
-					if not other.render(surface, ox=self.ax, oy=self.ay):
-						self.other.remove(other)
-
-			return [0, 0]
+			return (0, 0)

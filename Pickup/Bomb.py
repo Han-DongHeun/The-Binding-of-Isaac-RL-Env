@@ -8,17 +8,15 @@
 from pygame import *
 from math import *
 from utils.Animation import *
-from Item.Item import *
+from Pickup.Pickup import *
 
-class Bomb(Item):
+class Bomb(Pickup):
 	"""Droppable bomb class"""
 
 	exploded = False
 	fuse = 2
 
-	def __init__(self, variant, xy, sound, textures):
-		super().__init__(xy, sound, textures["bombs"])
-		self.variant = variant
+	tex
 
 	def pickup(self):
 		self.pickedUp = True

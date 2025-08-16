@@ -7,23 +7,9 @@
 
 import xml.etree.ElementTree as xml
 import os
-from Item.Heart import *
-from Item.PHD import *
-from Item.Pill import *
-
-alph = "abcdefghijklmnopqrstuvwxyz0123456789 "
-
-def darken(image, amount):
-	"Darken the image but preseve transparency"
-
-	darken_level = max(0, int(255 * (1 - amount)))
-	darken_color = (darken_level, darken_level, darken_level)
-
-	darkened_image = image.convert_alpha()
-
-	darkened_image.fill(darken_color, special_flags=BLEND_RGB_MULT)
-
-	return darkened_image
+from Pickup.Heart import *
+from Pickup.PHD import *
+from Pickup.Pill import *
 
 def generateSeed():
 	# Create random level seed
@@ -37,154 +23,6 @@ def generateSeed():
 		finalSeed += characters[randint(0, SEED_LENGTH)]
 
 	return finalSeed
-
-def findRooms(floor, possibleCoords, rooms):
-	# Find rooms on the floor
-
-	rs = []
-	moves = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-
-	# Find rooms that can spawn 
-	for room in possibleCoords:
-		x, y = room
-		count = 0
-		for m in moves:
-			mx, my = m
-			newCoords = (x+mx, y+my)
-			
-			try:
-				if floor[newCoords].variant != 0:
-					count = 0
-					break
-			except:
-				pass
-
-			if newCoords in rooms:
-				count += 1
-
-		rs.append([room, count])
-
-	return rs
-
-def loadFloor(name, index, size, sounds, textures):
-	from Room.Room import Room
-	from Enemy.Gurdy import Gurdy
-	from Enemy.Duke import Duke
-
-	d = xml.parse(os.path.join('res', 'floors', name)).getroot()
-
-	floor = {}
-	floor[(0,0)] = Room(index, 0, (0,0), d[0], textures, sounds)
-
-	# Create the floor
-	moves = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-	unusedRooms = [i for i in range(2, len(d))]
-	possibleCoords = moves[:]
-	rooms = [(0,0)]
-	for i in range(size-1):
-		chosen = choice(possibleCoords)
-		x, y = chosen
-		possibleCoords.remove(chosen)
-		for m in moves:
-			mx, my = m
-			if (x+mx, y+my) not in rooms:
-				possibleCoords.append((x+mx, y+my))
-
-		unusedRoom = choice(unusedRooms)
-		unusedRooms.remove(unusedRoom)
-		rooms.append(chosen)
-
-		# Create a room at the selected spot
-		floor[chosen] = Room(index, 0, chosen, d[unusedRoom], textures, sounds)
-
-	# Spawn shop
-	someRooms = findRooms(floor, possibleCoords, rooms)
-	shuffle(someRooms)
-	for room in someRooms:
-		if room[1] == 1:
-			shop = tuple(room[0])
-			break
-	floor[shop] = Room(index, 5, shop, d[2], textures, sounds)
-	things = [
-		Heart(1, (4,3), [sounds["heartIntake"], sounds["holy"]], textures["pickupHearts"]),
-		Pill((6, 3), textures["pills"]),
-		PHD((8,3), sounds, textures["phd"])
-	]
-	for i in range(len(things)):
-		things[i].price = i*2+3
-		floor[shop].other.append(things[i])
-
-	# Spawn item room
-	someRooms = findRooms(floor, possibleCoords, rooms)
-	shuffle(someRooms)
-	for room in someRooms:
-		if room[1] == 1:
-			itemRoom = tuple(room[0])
-			break
-	floor[itemRoom] = Room(index, 1, itemRoom, d[1], textures, sounds)
-	if randint(0,10) == 0:
-		floor[itemRoom].other.append(PHD((6,3), sounds, textures["phd"]))
-	else:
-		floor[itemRoom].other.append(Pill((6,3), textures["pills"]))
-
-	# Spawn boss room
-	someRooms = findRooms(floor, possibleCoords, rooms)
-	shuffle(someRooms)
-	for room in someRooms:
-		if room[1] == 1:
-			bossRoom = tuple(room[0])
-			break
-	floor[bossRoom] = Room(index, 2, bossRoom, d[0], textures, sounds)
-	floor[bossRoom].enemies.append([Gurdy, Duke][randint(0,1)](textures, sounds))
-
-	return floor
-
-def loadTexture(name, dir="", double=True):
-	# Load texture and double its size
-
-	if dir != "":
-		t = image.load(os.path.join('res', 'textures', dir, name))
-
-	else:
-		t = image.load(os.path.join('res','textures', name))
-
-	w = t.get_width()
-	h = t.get_height()
-
-	if double:
-		w *= 2
-		h *= 2
-
-	if False:
-		return transform.scale2x(t)
-	else:
-		return transform.scale(t, (w, h))
-
-class DummySound:
-	def play(self, *args):
-		pass
-
-	def stop(self, *args):
-		pass
-
-def loadSound(name, sound_on=HUMAN_MODE):
-	if sound_on == False:
-		s = DummySound()
-	else:
-		s = mixer.Sound(os.path.join('res','sounds', name))
-
-	return s
-
-def loadCFont(name, width, height, total, size=2):
-	# Load custom font
-
-	f = image.load(os.path.join('res', 'fonts', name))
-	digits = [transform.scale(f.subsurface(width*i, 0, width, height), list(map(int,(width*size, height*size)))) for i in range(total)]
-	space = Surface((width, height)).convert_alpha()
-	space.fill((0,0,0,0))
-	digits.append(space)
-
-	return digits
 
 def createSave(index, characterIndex, seed):
 	f = open("save-%i.dat"%(index+1), "w+")
@@ -203,22 +41,9 @@ def deleteSave(index):
 	except:
 		pass
 
-def write(text, font, alph=alph, dark=.8):
-	# Create surface with special font
-
-	width = font[0].get_width()
-	height = font[0].get_height()
-	writing = Surface((width*len(text), height)).convert_alpha()
-	writing.fill((0,0,0,0))
-	for i in range(len(text)):
-		writing.blit(font[alph.index(text[i].lower())], (i*width, 0))
-	return darken(writing, dark)
-
-
-
 # BOSS INTRO
 
-face = [None,None,None]
+""" face = [None,None,None]
 spot = [None,None,None,None,None,None,None]
 title = [None,None,None]
 bosstitle = [None,None,None]
@@ -294,7 +119,7 @@ def bossbar(screen, health):
     else:
         screen.blit(emptybar,(350,-30))
         draw.rect(screen,(255,0,0),Rect(380,38,int(200*health)+45,16))
-        screen.blit(skull,(364,20))
+        screen.blit(skull,(364,20)) """
 
 def get_center(x=6, y=3):
 	centerx = GRIDX + (x + 0.5) * GRATIO

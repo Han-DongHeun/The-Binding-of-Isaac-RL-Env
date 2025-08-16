@@ -11,6 +11,7 @@ from pygame import *
 from math import *
 from utils.const import *
 from utils.func import *
+from utils.loadResource import *
 
 def pause(screen, seed, textures : dict[str, Surface], fonts, stats):
 	running = True

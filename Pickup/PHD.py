@@ -8,9 +8,9 @@
 
 from pygame import *
 from utils.const import *
-from Item.Item import *
+from Pickup.Pickup import *
 
-class PHD(Item):
+class PHD(Pickup):
 	"""The PHD is used to allow all positive affects on pills"""
 	
 	collideable = False

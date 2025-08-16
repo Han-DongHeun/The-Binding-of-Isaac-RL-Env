@@ -8,9 +8,9 @@
 from pygame import *
 from utils.const import *
 from utils.Animation import *
-from Item.Item import *
+from Pickup.Pickup import *
 
-class Coin(Item):
+class Coin(Pickup):
 	"""Pickup coin class"""
 
 	def __init__(self, variant, xy, sounds, textures):

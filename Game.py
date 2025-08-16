@@ -10,15 +10,17 @@ from pygame import *
 from utils.func import *
 from Character.Character import *
 from Room.Room import *
-from Item.Bomb import *
-from Item.TrollBomb import *
+from Pickup.Bomb import *
+from Pickup.TrollBomb import *
 from time import time as cTime
 from Menu.pause import *
-from Item.Pill import *
+from Pickup.Pill import *
 from Menu.Banner import *
 from Enemy.Gurdy import *
 from Enemy.Duke import *
 import random
+
+from utils.loadFloor import loadFloor
 
 class Game:
 	floor = {}
@@ -27,6 +29,7 @@ class Game:
 	currentRoom = (0,0)
 	animatingRooms = []
 	won = False
+
 	def __init__(self, characterType, controls, seed):
 		self.characterType = characterType
 		self.seed = seed
@@ -39,33 +42,7 @@ class Game:
 
 	def setup(self):
 		# Load floor with custom data
-		floor = loadFloor("basement.xml", self.floor_key, randint(8, 12), self.sounds, self.textures)
-		adjecent = [0, 1], [-1, 0], [0, -1], [1, 0]
-
-		# Position isaac in the center of the room
-		self.isaac.x, self.isaac.y = (WIDTH//2, HEIGHT//2)
-
-		# Add a door to every room
-		for coord in floor:
-			for i in range(len(adjecent)):
-				diffX = adjecent[i][0]
-				diffY = adjecent[i][1]
-
-				coordX = coord[0]
-				coordY = coord[1]
-
-				if (diffX + coordX, diffY + coordY) not in floor:
-					continue
-
-				room = floor[(diffX + coordX, diffY + coordY)]
-				if room.variant != 0:
-					room.addDoor(i, room.variant)
-				else:
-					room.addDoor(i, floor[coord].variant)
-
-		# Create a banner for the new floor
-		self.floor = floor
-		self.banners.append(Banner(["Basement", "Caves", "Catacombs","Necropolis","Depths","Womb","Uterus"][self.floor_idx], self.textures))
+		self.floor = loadFloor("basement")
 
 	def updateMinimap(self, currentRoom):
 		# Draw the minimap

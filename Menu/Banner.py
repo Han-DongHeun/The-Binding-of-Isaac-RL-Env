@@ -10,6 +10,7 @@ from pygame import *
 from time import time as cTime
 from utils.func import *
 from utils.const import *
+from utils.loadResource import loadCFont, write
 
 class Banner:
 	def __init__(self, text, textures):

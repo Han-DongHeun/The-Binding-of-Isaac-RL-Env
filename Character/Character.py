@@ -10,15 +10,15 @@ from random import randint
 from math import *
 from utils.const import GRATIO
 from Character.Tear import *
-from Room.Fire import *
-from Item.Coin import *
-from Item.Key import *
-from Item.Pickup import *
-from Item.Heart import *
-from Item.Bomb import *
-from Item.Item import *
-from Item.Pill import *
-from Item.PHD import *
+from Obstacle.Fire import *
+from Pickup.Coin import *
+from Pickup.Key import *
+from Pickup.Pickup import *
+from Pickup.Heart import *
+from Pickup.Bomb import *
+from Pickup.Pickup import *
+from Pickup.Pill import *
+from Pickup.PHD import *
 from Room.Trapdoor import *
 from Menu.Banner import *
 
@@ -56,8 +56,6 @@ class Character:
 		# The rect for the characters body
 		self.bodyRect = Rect(self.x-16*SIZING, self.y-16*SIZING, 32*SIZING, 32*SIZING)
 
-		# The things he can pickup
-		self.pickups = [Pickup(i, textures["pickups"], fonts["pickups"]) for i in range(3)] # Keys, Bombs, Coins
 
 		# Used for holding arms in the air and gettting hurt
 		self.specialFrame = 0
@@ -100,8 +98,8 @@ class Character:
 
 		self.tear_idx = None
 
-		# The items isaac has picked up
-		self.items = []
+		# The Pickups isaac has picked up
+		self.Pickups = []
 
 	def heal(self, ammount, variant):
 		# Heal character
@@ -340,7 +338,7 @@ class Character:
 					ob.pickup()
 			elif type(ob) == PHD:
 				if self.pickups[0].use(ob.price):
-					self.items.append(ob)
+					self.Pickups.append(ob)
 					ob.pickup()
 			elif type(ob) == Trapdoor:
 				self.game.floorIndex += 1
@@ -440,8 +438,8 @@ class Character:
 		if self.pill != None:
 			surface.blit(self.pill.texture, (WIDTH-80, HEIGHT-60))
 
-		for item in self.items:
-			item.renderCorner(surface)
+		for Pickup in self.Pickups:
+			Pickup.renderCorner(surface)
 
 		self.current_frame += 1
 		self.hurt_timer = max(0, self.hurt_timer - 1)

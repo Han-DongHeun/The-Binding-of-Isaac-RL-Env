@@ -8,9 +8,9 @@
 from pygame import *
 from utils.const import *
 from utils.Animation import *
-import utils.func as func
+from utils.func import get_center
 
-class Item:
+class Pickup:
 	"""Main item class"""
 
 	collideable = False
@@ -18,22 +18,16 @@ class Item:
 
 	price = 0
 
-	def __init__(self, xy, sound, textures):
-		self.x, self.y = xy
-		self.sound = sound
+	current_frame = 0
+	frame_interval = 4
 
-		center = (GRIDX + (self.x + 0.5) * GRATIO, GRIDY + (self.y + 0.5) * GRATIO)
+	renderf = None
 
-		if type(textures) == list:
-			self.current_frame = 0
-			self.frame_interval = 4
-			self.anim = textures
-			self.bounds = textures[0].get_rect(center=center)
-			self.renderf = self.anim_render
-		else:
-			self.texture = textures
-			self.bounds = textures.get_rect(center=center)
-			self.renderf = self.texture_render
+	def __init__(self, gxy):
+		self.gx, self.gy = gxy
+
+		center_x, center_y = get_center(*gxy)
+		self.bounds = Rect(center_x - 8, center_y - 8, 16, 16)
 
 	def pickup(self):
 		self.pickedUp = True
@@ -44,6 +38,7 @@ class Item:
 		if self.pickedUp:
 			return False
 		self.renderf(surface, ox, oy)
+		self.current_frame += 1
 		return True
 
 	def texture_render(self, surface, ox=0, oy=0):

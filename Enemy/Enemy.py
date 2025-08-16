@@ -13,6 +13,7 @@ from utils.AStar import *
 from utils.func import clamp
 from utils.func import get_center
 from Character.Tear import Tear
+from utils.loadResource import textures, sounds
 
 class Enemy:
 	"""Enemy parent class"""
@@ -41,13 +42,14 @@ class Enemy:
 	current_frame = 0
 	interval_frame = 4
 
-	def __init__(self, xy, frames, tear_texure, tear_sound):
+	frames = None
+	tear_texure = textures["tears"]["blood"]
+	tear_sound = sounds["tear"][0]
+
+	def __init__(self, xy):
 		self.x, self.y = get_center(*xy)
-		self.frames = frames
 		self.bounds = Rect(0, 0, 32*SIZING, 32*SIZING)
 		self.bounds.center = (self.x, self.y)
-		self.tear_texture = tear_texure
-		self.tear_sound = tear_sound
 
 	def hurt(self, amount):
 		if not self.dead:

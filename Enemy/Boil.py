@@ -28,8 +28,8 @@ class Boil(Enemy):
 		pass
 
 	def checkTear(self):
-		if self.tear_timer > 0 and self.health < self.max_health:
-			return False
+		if self.tear_timer > 0 or self.health < self.max_health:
+			return
 
 		self.tears.append(Tear(choice([(1,0),(-1,0),(0,-1),(0,1)]), (self.x, self.y), (0, 0), 1, self.tear_damage, 1, False, self.tear_texture, self.tear_sound))
 		self.tear_timer = self.max_tear_timer

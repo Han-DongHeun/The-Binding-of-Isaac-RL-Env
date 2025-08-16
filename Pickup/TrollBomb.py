@@ -2,7 +2,7 @@ from pygame import *
 from random import randint
 from math import *
 from utils.Animation import *
-from Item.Item import *
+from Pickup.Pickup import *
 from utils.func import get_center
 
 class TrollBomb:

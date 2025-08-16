@@ -9,10 +9,10 @@
 from pygame import *
 from utils.const import *
 from utils.Animation import *
-from Item.Item import *
+from Pickup.Pickup import *
 import utils.func as func
 
-class Heart(Item):
+class Heart(Pickup):
 	"""Pickup Heart class"""
 
 	health = 2

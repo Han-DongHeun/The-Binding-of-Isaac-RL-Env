@@ -11,6 +11,7 @@ from math import *
 from random import *
 from utils.func import *
 from utils.const import HUMAN_MODE
+from utils.loadResource import *
 
 def menu(screen:Surface, sounds):
 	char = 1

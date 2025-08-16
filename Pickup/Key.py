@@ -3,15 +3,15 @@
 # Moose Abumeeiz
 #
 # The class for the key that you can pickup.
-# The key can be used to unlock rooms such as item rooms and shops.
+# The key can be used to unlock rooms such as Pickup rooms and shops.
 # 
 
 from pygame import *
 from utils.const import *
 from utils.Animation import *
-from Item.Item import *
+from Pickup.Pickup import *
 
-class Key(Item):
+class Key(Pickup):
 	"""Pickup Key class"""
 
 	def __init__(self, variant, xy, sounds, textures):
