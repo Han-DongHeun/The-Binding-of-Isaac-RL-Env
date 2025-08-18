@@ -53,7 +53,7 @@ class UIPickup:
 
 	def __init__(self, variant):
 		self.variant = variant
-		self.score = 0
+		self.score = 1
 
 		self.texture = textures["pickups"][variant]
 		self.updateDigits()

@@ -79,6 +79,7 @@ class Room:
 		self.obstacles: list[Obstacle] = []
 		self.doors: list[Door] = []
 		self.pickups: list[Pickup] = []
+		self.other = []
 
 		if xy == (0, 0):
 			controls = textures["controls"]
@@ -175,6 +176,8 @@ class Room:
 			obstacle.render(surface, self.ax, self.ay)
 
 		self.pickups = [pickup for pickup in self.pickups if pickup.render(surface, self.ax, self.ay)]
+
+		self.other = [obj for obj in self.other if obj.render(surface, self.ax, self.ay)]
 
 		if not self.animating:
 			self.enemies = [enemy for enemy in self.enemies if enemy.render(surface, character, self.nodes, self.paths, self.levelBounds, self.obstacles)]

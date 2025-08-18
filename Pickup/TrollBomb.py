@@ -8,6 +8,8 @@ from utils.func import get_center
 class TrollBomb:
 	
 	def __init__(self, parent, variant, xy, sounds, textures):
+		self.x, self.y = xy
+
 		self.sounds = sounds
 		self.parent = parent
 		
@@ -31,8 +33,8 @@ class TrollBomb:
 	def explode(self):
 		# Explode bomb, draw the stain on the background
 		self.parent.backdrop.blit(self.explode_texture, self.explode_rect)
-		for ob in self.parent.rocks + self.parent.poops + self.parent.fires:
-			if sqrt((ob.x-self.x)**2 + (ob.y-self.y)**2) < 2:
+		for ob in self.parent.obstacles:
+			if sqrt((ob.gx-self.x)**2 + (ob.gy-self.y)**2) < 2:
 				# Try to hur the enemy, if its not an entity, destroy it
 				try:
 					ob.destroy()
