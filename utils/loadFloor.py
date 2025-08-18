@@ -44,8 +44,7 @@ def loadFloor(room_type='basement', size=10):
     selected_rooms = []
     end_rooms = []
 
-    debugging_iter = 0
-    while not (len(end_rooms) == 5 and len(selected_rooms) == 10):
+    while not (len(end_rooms) == 5 and len(selected_rooms) == size):
         selected_rooms = [(0, 0)]
         end_rooms = []
 
@@ -56,10 +55,12 @@ def loadFloor(room_type='basement', size=10):
                 
                 child_flag = False
                 x, y = room
-                for mx, my in random.shuffle(moves):
+
+                random.shuffle(moves)
+                for mx, my in moves:
                     cx, cy = x + mx, y + my
                     n_of_neighbor = sum((cx + mx, cy + my) in selected_rooms for mx, my in moves)
-                    if (cx, cy) not in selected_rooms and random.random() < 0.5 and n_of_neighbor == 1 and len(selected_rooms) < 10:
+                    if (cx, cy) not in selected_rooms and random.random() < 0.5 and n_of_neighbor == 1 and len(selected_rooms) < size:
                         child_flag = True
                         selected_rooms.append((cx, cy))
                         next_rooms.append((cx, cy))
@@ -70,12 +71,9 @@ def loadFloor(room_type='basement', size=10):
             current_rooms = next_rooms
             next_rooms = []
 
-        print(debugging_iter, len(end_rooms), len(selected_rooms))
-        print(selected_rooms)
-        debugging_iter += 1
-
     floor = {pos : Room(room_type, pos, loadRoom(room_type)) for pos in selected_rooms}
 
+    moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     for (x, y), room in floor.items():
         for i, (dx, dy) in enumerate(moves):
             if (x + dx, y + dy) in floor:
