@@ -54,12 +54,6 @@ class Room:
 
 		self.backdrop_rect = backdrop.get_rect(center=(WIDTH//2, HEIGHT//2))
 
-		# Show tutorial controls if its the first room
-		if xy == (0, 0):
-			controls = textures["controls"]
-			controls_rect = controls.get_rect(center=(self.backdrop_rect.width//2, self.backdrop_rect.height//2))
-			backdrop.blit(controls, controls_rect)
-
 		# Setup x and y
 		self.x, self.y = xy
 		self.w, self.h = 0,0
@@ -86,7 +80,12 @@ class Room:
 		self.doors: list[Door] = []
 		self.pickups: list[Pickup] = []
 
-		self.generateObjects(objects)
+		if xy == (0, 0):
+			controls = textures["controls"]
+			controls_rect = controls.get_rect(center=(self.backdrop_rect.width//2, self.backdrop_rect.height//2))
+			backdrop.blit(controls, controls_rect)
+		else:
+			self.generateObjects(objects)
 
 		# Setup room for path finding
 		graph, self.nodes = make_graph({"width": 13, "height": 7, "obstacle": self.obstacles})
@@ -107,36 +106,22 @@ class Room:
 	def addDoor(self, door_idx, variant):
 		self.doors.append(Door(self.floor, door_idx, variant, True, self.textures["doors"], self.sounds))
 
-	def animateOut(self, direction):
+	def animateOut(self, move):
 		# animate the room out
-
 		self.animating = True
 
-		if direction[1] == -1:
-			self.aDirection = 0
-		elif direction[0] == -1:
-			self.aDirection = 1
-		elif direction[1] == 1:
-			self.aDirection = 2
-		elif direction[0] == 1:
-			self.aDirection = 3
+		dx, dy = move
+		self.move = (-dx, -dy)
 
-	def animateIn(self, direction):
+	def animateIn(self, move):
 		# Animate the room in
 
 		self.animating = True
 
-		if direction[1] == -1:
-			self.aDirection = 0
-		elif direction[0] == -1:
-			self.aDirection = 1
-		elif direction[1] == 1:
-			self.aDirection = 2
-		elif direction[0] == 1:
-			self.aDirection = 3
+		dx, dy = move
+		self.move = (-dx, -dy)
 
-		self.ax, self.ay = [0, -1, 0, 1][self.aDirection] * WIDTH, [1, 0, -1, 0][self.aDirection] * HEIGHT
-		self.sx, self.sy = self.ax, self.ay
+		self.sx, self.sy = self.ax, self.ay = dx * WIDTH, dy * HEIGHT
 
 	def renderMap(self, minimap, currentRoom, detail):
 		ratio = 16 * SIZING # Pixel to size ratio
@@ -155,7 +140,7 @@ class Room:
 			return
 		
 		centerx = minimap.get_width() // 2 + (self.x - x) * ratio
-		centery = minimap.get_height() // 2 - (self.y - y) * ratio
+		centery = minimap.get_height() // 2 + (self.y - y) * ratio
 
 		if not detail:
 			size = (ratio * 3 // 2)
@@ -205,6 +190,6 @@ class Room:
 		
 		else:
 			move_frame = 20
-			self.ax += [0, 1, 0, -1][self.aDirection] * WIDTH / move_frame
-			self.ay += [-1, 0, 1, 0][self.aDirection] * HEIGHT / move_frame
+			self.ax += self.move[0] * WIDTH / move_frame
+			self.ay += self.move[1] * HEIGHT / move_frame
 			return (0, 0)

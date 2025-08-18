@@ -12,7 +12,6 @@ from Character.Character import *
 from Room.Room import *
 from Pickup.Bomb import *
 from Pickup.TrollBomb import *
-from time import time as cTime
 from Menu.pause import *
 from Pickup.Pill import *
 from Menu.Banner import *
@@ -70,13 +69,13 @@ class Game:
 		self.updateMinimap(self.currentRoom)
 
 
-	def run(self, screen, sounds, textures, fonts):
+	def run(self, screen, sounds, textures):
 		# Run the main loop
 		animatingRooms = self.animatingRooms
 
 		# Setup controls and create character
 		cn = self.controls
-		self.isaac = isaac = Character(self.characterType, (WIDTH//2, HEIGHT//2), [cn[3], cn[1], cn[2], cn[0], cn[7], cn[5], cn[6], cn[4]], textures, sounds, fonts)
+		self.isaac = isaac = Character(self.characterType, (WIDTH//2, HEIGHT//2), [cn[3], cn[1], cn[2], cn[0], cn[7], cn[5], cn[6], cn[4]], textures, sounds)
 
 		# Setup special stats
 		if self.characterType == 0:
@@ -98,8 +97,8 @@ class Game:
 		mHeight = self.minimap.get_height()
 		self.updateMinimap(self.currentRoom)
 
-		pad = 4
-		self.minimap.set_clip(Rect(pad, pad, mWidth - 2 * pad, mHeight - 2 * pad))
+		pad = 4 * SIZING
+		self.minimap.set_clip(Rect(pad, pad, mWidth - 3 * pad, mHeight - 3 * pad))
 		
 		minimap_rect = self.minimap.get_rect(topright=(WIDTH - GRIDX + GRATIO, GRIDY - GRATIO))
 		
@@ -114,15 +113,12 @@ class Game:
 
 		running = True
 		while running:
-
-			currTime = cTime()
-
 			for e in event.get():
 				if e.type == QUIT:
 					quit() 
 				elif e.type == KEYDOWN and e.key == K_ESCAPE:
 					# Pause the game
-					running = pause(screen, self.seed, textures, fonts, [self.isaac.speed, self.isaac.shotSpeed, self.isaac.damage, self.isaac.luck, self.isaac.shotRate, self.isaac.range])
+					running = pause(screen, self.seed, textures, [self.isaac.speed, self.isaac.shotSpeed, self.isaac.damage, self.isaac.luck, self.isaac.shotRate, self.isaac.range])
 
 				elif e.type == KEYDOWN:
 					if e.key == self.controls[-1]:
@@ -165,10 +161,9 @@ class Game:
 					animatingRooms.append(self.floor[old])
 
 					# Animate isaac with the room
-					grid_x = 6 - 6 * move[0]
-					grid_y = 3 + 3 * move[1]
-					isaac.x = (grid_x + 0.5) * GRATIO + GRIDX
-					isaac.y = (grid_y + 0.5) * GRATIO + GRIDY
+					gx = 6 - 6 * move[0]
+					gy = 3 - 3 * move[1]
+					isaac.x, isaac.y = get_center(gx, gy)
 
 					# Remove tears from an animating room
 					isaac.clearTears()

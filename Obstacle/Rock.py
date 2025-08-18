@@ -32,3 +32,6 @@ class Rock(Obstacle):
 	def destroy(self):
 		super().destroy()
 		self.texture = self.broken
+
+	def hurt(self, *arg):
+		pass

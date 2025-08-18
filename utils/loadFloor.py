@@ -41,10 +41,49 @@ def loadFloor(room_type='basement', size=10):
 
     moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
-    rooms = set()
-    neighbor = set([(0, 0)])
+    selected_rooms = []
+    end_rooms = []
 
-    while len(rooms) < size:
+    debugging_iter = 0
+    while not (len(end_rooms) == 5 and len(selected_rooms) == 10):
+        selected_rooms = [(0, 0)]
+        end_rooms = []
+
+        current_rooms = [(0, 0)]
+        next_rooms = []
+        while len(current_rooms) != 0:
+            for room in current_rooms:
+                
+                child_flag = False
+                x, y = room
+                for mx, my in random.shuffle(moves):
+                    cx, cy = x + mx, y + my
+                    n_of_neighbor = sum((cx + mx, cy + my) in selected_rooms for mx, my in moves)
+                    if (cx, cy) not in selected_rooms and random.random() < 0.5 and n_of_neighbor == 1 and len(selected_rooms) < 10:
+                        child_flag = True
+                        selected_rooms.append((cx, cy))
+                        next_rooms.append((cx, cy))
+                
+                if child_flag == False:
+                    end_rooms.append((x, y))
+
+            current_rooms = next_rooms
+            next_rooms = []
+
+        print(debugging_iter, len(end_rooms), len(selected_rooms))
+        print(selected_rooms)
+        debugging_iter += 1
+
+    floor = {pos : Room(room_type, pos, loadRoom(room_type)) for pos in selected_rooms}
+
+    for (x, y), room in floor.items():
+        for i, (dx, dy) in enumerate(moves):
+            if (x + dx, y + dy) in floor:
+                room.addDoor(i, room.variant)
+
+    return floor
+
+    """ while len(rooms) < size:
         x, y = pos = random.choice(list(neighbor))
 
         rooms.add(pos)
@@ -53,9 +92,6 @@ def loadFloor(room_type='basement', size=10):
 
     floor = {pos : Room(room_type, pos, loadRoom(room_type)) for pos in rooms}
 
-    for (x, y), room in floor.items():
-        for i, (dx, dy) in enumerate(moves):
-            if (x + dx, y + dy) in floor:
-                room.addDoor(i, room.variant)
 
-    return floor
+
+    return floor """

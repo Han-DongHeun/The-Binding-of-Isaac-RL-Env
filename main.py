@@ -21,7 +21,6 @@ import os
 
 # Create display
 
-
 def playMusic(name, sound_on=HUMAN_MODE):
 	if sound_on == False:
 		return
@@ -31,17 +30,6 @@ def playMusic(name, sound_on=HUMAN_MODE):
 # Setup display
 display.set_caption("The Binding of Isaac: Rebirth")
 display.set_icon(image.load(os.path.join('res','textures', 'icon.png')))
-
-
-
-
-
-# Load fonts
-fonts = {
-	"main": loadCFont("main.png", 20, 16, 36, size=1.8),
-	"pickups": loadCFont("pickup.png", 10, 12, 10),
-	"ticks": loadCFont("ticks.png", 4, 17 , 8),
-}
 
 # Begin main loop
 running = True
@@ -61,6 +49,6 @@ while running:
 
 	# Start game
 	game = Game(characterType, controls, floorSeed)
-	game.run(screen, sounds, textures, fonts)
+	game.run(screen, sounds, textures)
 
 quit()

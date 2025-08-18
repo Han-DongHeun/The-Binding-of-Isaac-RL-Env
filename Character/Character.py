@@ -21,13 +21,14 @@ from Pickup.Pill import *
 from Pickup.PHD import *
 from Room.Trapdoor import *
 from Menu.Banner import *
+from Room.Door import Door
 
 class Character:
 	"""The main class for Isaac"""
 
 	hurtDistance = .6 * SIZING
 
-	def __init__(self, variant, xy, controls, textures, sounds, fonts):
+	def __init__(self, variant, xy, controls, textures, sounds):
 		self.variant = variant
 		self.x, self.y = xy
 		self.textures = textures["character"][variant]
@@ -45,7 +46,7 @@ class Character:
 
 		# Tears + hearts
 		self.tears = []
-		self.hearts = [UIHeart(0, 2, textures["hearts"]) for _ in range(3)]
+		self.hearts = [UIHeart(0, 2) for _ in range(3)]
 
 		# Head, shoulders knees and toes, knees and toes!
 		self.heads = self.textures["heads"]
@@ -99,7 +100,7 @@ class Character:
 		self.tear_idx = None
 
 		# The Pickups isaac has picked up
-		self.pickups = []
+		self.pickups = [UIPickup(variant) for variant in range(3)]
 
 	def heal(self, ammount, variant):
 		# Heal character
@@ -238,7 +239,7 @@ class Character:
 			self.tears.append(Tear(tear_dir, (self.x, self.y), (self.xVel*1.5, self.yVel*1.5), self.shotSpeed, self.damage, self.range, True, self.tearTextures, self.tearSounds))
 			self.tear_timer = self.max_tear_timer
 
-	def moving(self, keys):
+	def moving(self, keys:dict):
 		# Find correct key
 		for control in self.key_map.keys():
 			k = self.key_map[control]
@@ -267,8 +268,9 @@ class Character:
 		else:
 			self.head = self.heads[0]
 
-	def render(self, surface, bounds, obsticals, pickups, doors):
-		move = [0, 0] # Which direction on the map to move
+	def render(self, surface, bounds:Rect, obsticals:list[Obstacle], pickups:list[Pickup], doors:list[Door]):
+		move = (0, 0) # Which direction on the map to move
+		moves = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
 		# Move feet when necesarry
 		if self.current_frame % self.step_interval_frame == 0:
@@ -292,67 +294,55 @@ class Character:
 		inBoundsX = bounds.collidepoint(self.x+dx, self.y)
 		inBoundsY = bounds.collidepoint(self.x, self.y+dy)
 
-		for ob in obsticals + pickups:
-			# Collide with ob
-			try:
-				if ob.destroyed:
-					continue
-			except:
-				pass
+		outBounds = not bounds.inflate(16 * SIZING, 16 * SIZING).collidepoint(self.x, self.y)
 
-			is_colliding = self.check_collision(16*SIZING, ob)
+		obColisionX = False
+		obColisionY = False
+
+		for obj in obsticals:
+			if obj.destroyed:
+				continue
+
+			is_colliding = self.check_collision(16*SIZING, obj)
 			if not is_colliding:
 				continue
 
-			inBoundsX = inBoundsX and not ob.bounds.collidepoint(self.x+dx, self.y)
-			inBoundsY = inBoundsY and not ob.bounds.collidepoint(self.x, self.y+dy)
-			# Bash out every possible tear collide
-			if type(ob) == Fire:
-				self.hurt(1, None, None, time)
-			elif type(ob) == Coin:
-				self.pickups[0].add(ob.worth)
-				ob.pickup()
-			elif type(ob) == Key:
-				if self.pickups[0].use(ob.price):
-					self.pickups[2].add(1)
-					ob.pickup()
-			elif type(ob) == Bomb:
-				if self.pickups[0].use(ob.price):
-					self.pickups[1].add(1)
-					ob.pickup()
-			elif type(ob) == Heart:
-				if self.pickups[0].use(ob.price):
-					amm = self.heal(ob.health, ob.variant)
-					if amm == 0:
-						self.hearts.append(UIHeart(ob.variant, ob.health, self.heartTextures))
-					elif type(amm) == int:
-						self.hearts.append(UIHeart(ob.variant, amm, self.heartTextures))
-					ob.pickup()
+			obColisionX |= obj.bounds.collidepoint(self.x+dx, self.y)
+			obColisionY |= obj.bounds.collidepoint(self.x, self.y+dy)
 
-					if ob.variant == 1: # Sould heart
-						self.specialFrame = 1
-						self.lastPickup = time
-			elif type(ob) == Pill:
-				if self.pickups[0].use(ob.price):
-					self.pill = ob
-					ob.pickup()
-			elif type(ob) == PHD:
-				if self.pickups[0].use(ob.price):
-					self.pickups.append(ob)
-					ob.pickup()
-			elif type(ob) == Trapdoor:
-				self.game.floorIndex += 1
-				self.game.currentRoom = (0,0)
-				self.game.setup()
-				self.game.updateFloor()
+			if isinstance(obj, Fire):
+				self.hurt(1, None, None)
 
-		# Moves x and y
-		mx = [0, 1, 0, -1]
-		my = [-1, 0, 1, 0]
+		for obj in pickups:
+			is_colliding = self.check_collision(16*SIZING, obj)
+			if not is_colliding:
+				continue
+
+			if isinstance(obj, Coin):
+				self.pickups[0].add(obj.worth)
+			elif isinstance(obj, Bomb):
+				self.pickups[1].add(1)
+			elif isinstance(obj, Key):
+				self.pickups[2].add(1)
+			elif isinstance(obj, Heart):
+				amount = self.heal(obj.health, obj.variant)
+				if amount == 0:
+					self.hearts.append(UIHeart(obj.variant, obj.health, self.heartTextures))
+				elif type(amount) == int:
+					self.hearts.append(UIHeart(obj.variant, amount, self.heartTextures))
+				if obj.variant == 1:
+					self.specialFrame = 1
+			elif isinstance(obj, Pill):
+				self.pill = obj
+			elif isinstance(obj, PHD):
+				pass
+			else:
+				print("Unexpected Pickup:", type(obj))
+			
+			obj.pickup()
 
 		# Render doors
-		for i in range(len(doors)):
-			door = doors[i]
+		for door in doors:
 
 			# Dont allow walking through closed doors
 			if not door.isOpen:
@@ -383,23 +373,13 @@ class Character:
 			if dcy:
 				self.y += dy
 
-			side = door.side
-
-			# Try to walk throught the door
-			if not dcx or not dcy:
-				if sum(map(int, [
-						mx[side] < 0 and door.rect.centerx > (self.x + dx),
-						mx[side] > 0 and door.rect.centerx < (self.x + dx),
-						my[side] > 0 and door.rect.centery > (self.y + dy),
-						my[side] < 0 and door.rect.centery < (self.y + dy),
-					])) == 1:
-					move[0] = mx[side]
-					move[1] = my[side]
-					break
+			if (dcx or dcy) and outBounds:
+				move = moves[door.side]
+				break
 
 		# Move character 
-		self.x += dx if	inBoundsX else 0
-		self.y += dy if inBoundsY else 0
+		self.x += dx if	inBoundsX and not obColisionX else 0
+		self.y += dy if inBoundsY and not obColisionY else 0
 
 		# Update characters body rect
 		self.bodyRect = Rect(self.x-16, self.y, 16, 16) # Move body rect
@@ -429,17 +409,14 @@ class Character:
 			if not tear.render(surface, bounds, obsticals):
 				self.tears.remove(tear)
 
-		for i in range(len(self.hearts)):
-			self.hearts[i].render(surface, i)
+		for i, h in enumerate(self.hearts):
+			h.render(surface, i)
 
 		for p in self.pickups:
 			p.render(surface)
 
 		if self.pill != None:
 			surface.blit(self.pill.texture, (WIDTH-80, HEIGHT-60))
-
-		for pickup in self.pickups:
-			pickup.renderCorner(surface)
 
 		self.current_frame += 1
 		self.hurt_timer = max(0, self.hurt_timer - 1)

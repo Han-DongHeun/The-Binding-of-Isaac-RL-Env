@@ -70,6 +70,13 @@ def loadCFont(name, width, height, total, size=2):
 
 	return digits
 
+fonts = {
+	"main": loadCFont("main.png", 20, 16, 36, size=1.8),
+	"pickups": loadCFont("pickup.png", 10, 12, 10),
+	"ticks": loadCFont("ticks.png", 4, 17 , 8),
+}
+fonts = resizing(fonts)
+
 alph = "abcdefghijklmnopqrstuvwxyz0123456789 "
 def write(text, font, alph=alph, dark=.8):
 	# Create surface with special font
@@ -241,6 +248,14 @@ textures["enemies"].update({
 	"host" : [textures["enemies"]["host"].subsurface(i*64, 0, 64, 128) for i in range(2)],
 	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)]
 })
+
+textures["pickups"] = [textures["pickups"].subsurface(Rect(variant//2*16*2, variant%2*16*2, 16*2, 16*2)) for variant in range(3)]
+
+textures["hearts"] = [
+	[textures["hearts"].subsurface(16 * 2 * (2 - health), 0, 16 * 2, 16 * 2) for health in range(3)],
+	[textures["hearts"].subsurface(16 * 2 * (1 - health), 16 * 2, 16 * 2, 16 * 2) for health in range(2)],
+	[textures["hearts"].subsurface(16 * 2 * (3 - health), 16 * 2, 16 * 2, 16 * 2) for health in range(2)]
+]
 	
 textures = resizing(textures)
 

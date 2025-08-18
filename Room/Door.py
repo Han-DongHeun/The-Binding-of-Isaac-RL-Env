@@ -25,8 +25,6 @@ class Door:
 	# ROOMS ARE 13 x 7
 
 	def __init__(self, floor, side, variant, isOpen, texture, sounds):
-		if side & 1 == 0:
-			side ^= 2 #임시 코드
 		self.side = side
 		self.variant = variant
 		self.locked = False
@@ -92,9 +90,7 @@ class Door:
 
 	def render(self, surface, ox=0, oy=0):
 		# Convert grid x and y to pixel x and y
-		render_rect = self.render_rect.copy()
-		render_rect.x += ox
-		render_rect.y += oy
+		render_rect = self.render_rect.move(ox, oy)
 
 		surface.blit(self.doorBack, render_rect)
 

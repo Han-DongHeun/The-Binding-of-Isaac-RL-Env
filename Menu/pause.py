@@ -13,7 +13,7 @@ from utils.const import *
 from utils.func import *
 from utils.loadResource import *
 
-def pause(screen, seed, textures : dict[str, Surface], fonts, stats):
+def pause(screen, seed, textures : dict[str, Surface], stats):
 	running = True
 	arrowpoint = 0
 	pausecard = textures["pauseCard"]
@@ -33,7 +33,7 @@ def pause(screen, seed, textures : dict[str, Surface], fonts, stats):
 
 	roading_frame = 20
 	for i in reversed(range(roading_frame)):
-		clock.tick(60)
+		clock.tick(10)
 		screen.blit(slide,(0,0))
 
 		pausecard_rect.centerx = WIDTH//2 - WIDTH//roading_frame * i
@@ -87,12 +87,12 @@ def pause(screen, seed, textures : dict[str, Surface], fonts, stats):
 		for i in range(luck):
 			screen.blit(ticker[i],(545+(i*8),260)) """
 
-		clock.tick(60)               
+		clock.tick(10)               
 
 		display.flip()
 
 	for i in range(roading_frame):
-		clock.tick(60)
+		clock.tick(10)
 
 		screen.blit(slide,(0,0))
 
