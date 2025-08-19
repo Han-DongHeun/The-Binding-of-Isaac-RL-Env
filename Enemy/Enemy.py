@@ -103,7 +103,7 @@ class Enemy:
 			if sqrt(dx**2 + dy**2) < 0.15:
 				self.path = self.path[1:]
 
-		if len(self.path) > 0:
+		if not self.isFlying and len(self.path) > 0:
 			# Head towards next point
 			dx, dy = self.path[0][0] - self.x, self.path[0][1] - self.y
 		else:
@@ -124,10 +124,10 @@ class Enemy:
 		# Do pathfinding
 		
 		gcx, gcy = (self.cx - GRIDX) // GRATIO, (self.cy - GRIDX) // GRATIO
-		gcx, gcy = clamp(gcx, 0, 12), clamp(gcy, 0, 6)
+		gcx, gcy = clamp(int(gcx), 0, 12), clamp(int(gcy), 0, 6)
 
 		gx, gy = (self.x - GRIDX) // GRATIO, (self.y - GRIDX) // GRATIO
-		gx, gy = clamp(gx, 0, 12), clamp(gy, 0, 6)
+		gx, gy = clamp(int(gx), 0, 12), clamp(int(gy), 0, 6)
 
 		if self.isFlying:
 			return
