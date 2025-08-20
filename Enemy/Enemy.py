@@ -14,6 +14,7 @@ from utils.func import clamp
 from utils.func import get_center
 from Character.Tear import Tear
 from utils.loadResource import textures, sounds
+import random
 
 class Enemy:
 	"""Enemy parent class"""
@@ -23,13 +24,11 @@ class Enemy:
 
 	isFlying = False
 	dead = False
-	path = []
 	cx, cx = 0, 0
 	health = 1
 	weight = 1
 	speed = SIZING
 
-	tears = []
 
 	damage = 1
 	tear_damage = 1
@@ -43,10 +42,12 @@ class Enemy:
 	interval_frame = 4
 
 	frames = None
-	tear_texure = textures["tears"]["blood"]
+	tear_texture = textures["tears"]["blood"]
 	tear_sound = sounds["tear"][0]
 
 	def __init__(self, xy):
+		self.path = []
+		self.tears = []
 		self.x, self.y = get_center(*xy)
 		self.bounds = Rect(0, 0, 32*SIZING, 32*SIZING)
 		self.bounds.center = (self.x, self.y)
@@ -88,14 +89,17 @@ class Enemy:
 		dx, dy = self.cx - self.x, self.cy - self.y
 		dist = sqrt(dx**2 + dy**2)
 
-		self.tears.append(Tear((dx/dist, dy/dist), (self.x, self.y), (0, 0), 1, self.tear_damage, 1, False, self.tear_texture, self.tear_sound))
+		self.tears.append(Tear((dx/dist, dy/dist), (self.x, self.y), (0, 0), 1, self.tear_damage, 1, False))
 		self.tear_timer = self.max_tear_timer
 
 	def die(self):
 		self.dead = True
 
 	def move(self):
-		if not self.isFlying and len(self.path) != 0:
+		if self.isFlying:
+			dx, dy = self.cx - self.x, self.cy - self.y
+
+		elif len(self.path) > 0:
 			# MOVE TO NEXT PATH
 
 			dx, dy = self.path[0][0] - self.x, self.path[0][1] - self.y
@@ -103,15 +107,11 @@ class Enemy:
 			if sqrt(dx**2 + dy**2) < 0.15:
 				self.path = self.path[1:]
 
-		if not self.isFlying and len(self.path) > 0:
-			# Head towards next point
-			dx, dy = self.path[0][0] - self.x, self.path[0][1] - self.y
 		else:
-			# Head towards character
-			dx, dy = self.cx - self.x, self.cy - self.y
-
+			return
+		
 		# Move ratios
-		dist = sqrt(dx**2 + dy**2) + 1e-7
+		dist = sqrt(dx**2 + dy**2) + 1e-8
 		
 		rx = dx / dist
 		ry = dy / dist
@@ -123,10 +123,10 @@ class Enemy:
 	def pathFind(self, nodes, paths):
 		# Do pathfinding
 		
-		gcx, gcy = (self.cx - GRIDX) // GRATIO, (self.cy - GRIDX) // GRATIO
+		gcx, gcy = (self.cx - GRIDX) // GRATIO, (self.cy - GRIDY) // GRATIO
 		gcx, gcy = clamp(int(gcx), 0, 12), clamp(int(gcy), 0, 6)
 
-		gx, gy = (self.x - GRIDX) // GRATIO, (self.y - GRIDX) // GRATIO
+		gx, gy = (self.x - GRIDX) // GRATIO, (self.y - GRIDY) // GRATIO
 		gx, gy = clamp(int(gx), 0, 12), clamp(int(gy), 0, 6)
 
 		if self.isFlying:
@@ -137,13 +137,18 @@ class Enemy:
 		path = paths.search(start, end)
 		if path is None:
 			# There is no path found to the character
-
-			self.path = []
+			self.path = self.randomPathFind(nodes, paths)
 		else:
 			for i in range(len(path)):
 				p = path[i]
 				path[i] = (p.x, p.y)
 			self.path = path[1:]
+
+	def randomPathFind(self, nodes, paths):
+		gx, gy = (self.x - GRIDX) // GRATIO, (self.y - GRIDY) // GRATIO
+		gx, gy = clamp(int(gx), 0, 12), clamp(int(gy), 0, 6)
+
+		self.path = [random.choice(paths.graph[nodes[gx][gy]])]
 
 	def render(self, surface, character, nodes, paths, bounds, obsticals):
 
@@ -158,7 +163,7 @@ class Enemy:
 		self.tear_timer = max(0, self.tear_timer - 1)
 
 		for tear in self.tears[:]:
-			if not tear.render(surface, time, bounds, obsticals):
+			if not tear.render(surface, bounds, obsticals):
 				self.tears.remove(tear)
 
 		self.update()
