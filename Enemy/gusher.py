@@ -1,6 +1,6 @@
 from Enemy.Enemy import *
 
-class Horf(Enemy):
+class Gusher(Enemy):
     hurtDistance = 50 * SIZING
     health = 12
 
