@@ -173,7 +173,11 @@ textures = {
         "fly": loadTexture("fly.png", dir="enemies"),
         "host": loadTexture("host.png", dir="enemies"),
         "maw": loadTexture("maw.png", dir="enemies"),
+		"horf" : loadTexture("horf.png", dir="enemies"),
         "pooter": loadTexture("pooter.png", dir="enemies"),
+		"legs" : loadTexture("legs.png", dir="enemies"),
+		"spider" : loadTexture("spider.png", dir="enemies"),
+		"bigSpider" : loadTexture("bigSpider.png", dir="enemies")
     },
     
     # --- 기타 효과 ---
@@ -243,10 +247,13 @@ textures["bombs"]["smut"] = [textures["bombs"]["smut"].subsurface(192*x, 128*y, 
 
 textures["enemies"].update({
 	"fly" : [textures["enemies"]["fly"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
+	"attackFly" : [textures["enemies"]["fly"].subsurface(i * 64, 64, 64, 64) for i in range(2)],
 	"pooter" : [textures["enemies"]["pooter"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
 	"boil" : [textures["enemies"]["boil"].subsurface(64 * (i % 4), 64 * (i // 4), 64, 64) for i in reversed(range(10))],
 	"host" : [textures["enemies"]["host"].subsurface(i*64, 0, 64, 128) for i in range(2)],
-	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)]
+	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)],
+	"horf" : [textures["enemies"]["horf"].subsurface(0, 0, 64, 64)],
+	"pacer" : [textures["enemies"]["legs"].subsurface(0, 0, 64, 64)],
 })
 
 textures["pickups"] = [textures["pickups"].subsurface(Rect(variant//2*16*2, variant%2*16*2, 16*2, 16*2)) for variant in range(3)]
