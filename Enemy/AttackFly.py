@@ -1,14 +1,13 @@
-from pygame import *
-from utils.const import *
-from Enemy.Enemy import Enemy
+from Enemy.Enemy import *
 
 class AttackFly(Enemy):
-	"""Simple enemy fly class"""
 
 	isFlying = True
-	health = 4
+	health = 5
 	weight = 1
 	hurtDistance = 40 * SIZING
+
+	texture = textures["enemies"]["attackFly"][1]
 	
 	def checkTear(self):
 		pass

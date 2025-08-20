@@ -6,11 +6,8 @@
 # characters directions
 # 
 
-from pygame import *
-from utils.const import *
 from Enemy.Enemy import *
-from Character.Tear import *
-
+from random import randint
 
 class Host(Enemy):
 
