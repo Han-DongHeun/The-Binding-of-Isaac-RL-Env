@@ -236,7 +236,7 @@ class Character:
 
 		if self.tear_idx != None and self.tear_timer == 0:
 			tear_dir = ((0, 1), (1, 0), (0, -1), (-1, 0))[self.tear_idx]
-			self.tears.append(Tear(tear_dir, (self.x, self.y), (self.xVel*1.5, self.yVel*1.5), self.shotSpeed, self.damage, self.range, True, self.tearTextures, self.tearSounds))
+			self.tears.append(Tear(tear_dir, (self.x, self.y), (self.xVel*0.2, self.yVel*0.2), self.shotSpeed, self.damage, self.range, True))
 			self.tear_timer = self.max_tear_timer
 
 	def moving(self, keys:dict):
