@@ -8,7 +8,7 @@ from Room.Room import Room
 
 def loadRoom(room_type='basement'):
 
-    room_folder = os.path.join('assets/maps/', room_type)
+    room_folder = os.path.join('res/floors/', room_type)
     map_files = [f for f in os.listdir(room_folder) if f.endswith('.tmx')]
     if len(map_files) == 0:
         raise FileNotFoundError(f"'{room_folder}' is empty.")
@@ -21,21 +21,26 @@ def loadRoom(room_type='basement'):
     types = ('obstacle', 'pickup', 'enemy')
     datas = {t : [] for t in types}
 
-    data_layer = tmx_data.get_layer_by_name('Tile Layer 1')
-    for x, y, gid in data_layer:
-        if not gid:
-            continue
+    layers = (
+        tmx_data.get_layer_by_name('Obstacle Layer'),
+        tmx_data.get_layer_by_name('Pickup Layer'),
+        tmx_data.get_layer_by_name('Enemy Layer'),
+    )
+    for layer in layers:
+        for x, y, gid in layer:
+            if not gid:
+                continue
 
-        properties = tmx_data.get_tile_properties_by_gid(gid)
+            properties = tmx_data.get_tile_properties_by_gid(gid)
 
-        tile_type = properties.get('type')
-        tile_name = properties.get('name')
-        try:
-            datas[tile_type].append((tile_name, x, y))
-        except:
-            pass
+            tile_type = properties.get('type')
+            tile_name = properties.get('name')
+            try:
+                datas[tile_type].append((tile_name, x, y))
+            except:
+                pass
 
-    return datas
+        return datas
 
 def loadFloor(room_type='basement', size=10):
 
