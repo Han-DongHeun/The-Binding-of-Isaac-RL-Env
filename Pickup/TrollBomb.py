@@ -7,7 +7,8 @@ from utils.func import get_center
 
 class TrollBomb:
 	
-	def __init__(self, parent, variant, xy, sounds, textures):
+	def __init__(self, parent, variant, xy, sounds, textures, character):
+		self.character = character
 		self.x, self.y = xy
 
 		self.sounds = sounds
@@ -40,6 +41,10 @@ class TrollBomb:
 					ob.destroy()
 				except:
 					ob.hurt(8)
+		
+		cgx, cgy = (self.character.x - GRIDX) / GRATIO, (self.character.y - GRIDY) / GRATIO
+		if sqrt((cgx-self.x)**2 + (cgy-self.y)**2) < 2:
+			self.character.hurt(2, self.x * GRATIO + GRIDX, self.y * GRATIO + GRIDY)
 
 	def render(self, surface, ox=0, oy=0):
 		frame_idx = (self.current_frame - self.start_frame) // self.frame_interval
