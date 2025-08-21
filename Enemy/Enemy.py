@@ -21,6 +21,7 @@ class Enemy:
 
 	# Setup
 	texture = None
+	rect = None
 
 	isFlying = False
 	dead = False
@@ -42,8 +43,6 @@ class Enemy:
 	interval_frame = 4
 
 	frames = None
-	tear_texture = textures["tears"]["blood"]
-	tear_sound = sounds["tear"][0]
 
 	def __init__(self, xy):
 		self.path = []
@@ -167,12 +166,11 @@ class Enemy:
 				self.tears.remove(tear)
 
 		self.update()
-		rect = self.texture.get_rect(center=(self.x, self.y))
-		surface.blit(self.texture, rect)
+		surface.blit(self.texture, self.rect)
 
 		self.current_frame += 1
 
 		return not self.dead
 	
 	def update(self) -> Surface:
-		pass
+		self.rect = self.texture.get_rect(center=(self.x, self.y))

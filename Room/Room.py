@@ -99,7 +99,10 @@ class Room:
 
 		for type, path, repo in (enemy, obstacle, pickups):
 			for name, x, y in objects[type]:
-				name = name[0].upper() + name[1:]
+				if type == "enemy":
+					name = "Trite"
+				else:
+					name = name[0].upper() + name[1:]
 				object_module = importlib.import_module(f"{path}.{name}")
 				object_class = getattr(object_module, name)
 				repo.append(object_class((x, y)))

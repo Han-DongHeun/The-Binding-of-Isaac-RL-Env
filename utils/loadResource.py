@@ -177,7 +177,8 @@ textures = {
         "pooter": loadTexture("pooter.png", dir="enemies"),
 		"legs" : loadTexture("legs.png", dir="enemies"),
 		"spider" : loadTexture("spider.png", dir="enemies"),
-		"bigSpider" : loadTexture("bigSpider.png", dir="enemies")
+		"bigSpider" : loadTexture("bigSpider.png", dir="enemies"),
+		"trite" : loadTexture("trite.png", dir="enemies")
     },
     
     # --- 기타 효과 ---
@@ -254,6 +255,7 @@ textures["enemies"].update({
 	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)],
 	"horf" : [textures["enemies"]["horf"].subsurface(0, 0, 64, 64)],
 	"pacer" : [textures["enemies"]["legs"].subsurface(0, 0, 64, 64)],
+	"trite" : [textures["enemies"]["trite"].subsurface(0, 0, 96, 96)],
 })
 
 textures["pickups"] = [textures["pickups"].subsurface(Rect(variant//2*16*2, variant%2*16*2, 16*2, 16*2)) for variant in range(3)]
