@@ -124,7 +124,7 @@ class Game:
 					if e.key == self.controls[-1]:
 						# Bomb key pressed
 						if isaac.pickups[1].use(1):
-							self.floor[self.currentRoom].other.append(TrollBomb(self.floor[self.currentRoom], 0, ((isaac.x-GRIDX)/GRATIO, (isaac.y-GRIDY)/GRATIO), [sounds["explosion"]], textures["bombs"]))
+							self.floor[self.currentRoom].other.append(TrollBomb(self.floor[self.currentRoom], 0, ((isaac.x-GRIDX)/GRATIO, (isaac.y-GRIDY)/GRATIO), [sounds["explosion"]], textures["bombs"], isaac))
 
 					elif e.key == self.controls[-2]:
 						# Pill key pressed
