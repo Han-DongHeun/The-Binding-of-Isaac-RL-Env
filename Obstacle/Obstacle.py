@@ -17,8 +17,6 @@ class Obstacle:
         self.gx, self.gy = gxy
         self.x, self.y = get_center(*gxy)
 
-        self.collideable = False
-
         self.bounds = Rect(GRIDX + GRATIO * self.gx, GRIDY + GRATIO * self.gy, GRATIO, GRATIO)
 
     def destroy(self):
@@ -26,6 +24,7 @@ class Obstacle:
             return
         
         self.destroyed = True
+        self.collideable = False
         if self.destroy_sound != None:
             self.destroy_sound.play()
         self.health = 0
@@ -43,6 +42,9 @@ class Obstacle:
         self.update()
         rect = self.texture.get_rect(center=(self.x + ox, self.y + oy))
         surface.blit(self.texture, rect)
+
+    def collide(self, object):
+        pass
 
     def update(self):
         pass

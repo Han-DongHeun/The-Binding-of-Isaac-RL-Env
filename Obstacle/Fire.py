@@ -15,8 +15,6 @@ from utils.func import clamp
 
 class Fire(Obstacle):
 
-	collideable = False
-
 	health = 4
 
 	fire_frames = textures["fires"]["fireFrames"]
@@ -67,3 +65,6 @@ class Fire(Obstacle):
 
 		self.fire = fire_frames[fire_idx]
 		self.wood = self.wood_frames[wood_idx]
+
+	def collide(self, object):
+		object.hurt(1)

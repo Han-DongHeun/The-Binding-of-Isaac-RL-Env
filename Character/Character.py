@@ -34,8 +34,6 @@ class Character:
 		self.textures = textures["character"][variant]
 
 		# Record import sounds and textures
-		self.tearTextures = textures["tears"]
-		self.tearSounds = sounds["tear"]
 		self.heartTextures = textures["hearts"]
 		self.sounds = sounds["hurt"]
 
@@ -53,10 +51,11 @@ class Character:
 		self.tearHeads = self.textures["tearHeads"]
 		self.feet = self.textures["feet"]
 		self.specialFrames = self.textures["specialFrames"]
+		self.specialFrames[1].fill((10, 0, 0), special_flags=BLEND_RGB_ADD)
 
 		# The rect for the characters body
 		self.bodyRect = Rect(self.x-16*SIZING, self.y-16*SIZING, 32*SIZING, 32*SIZING)
-
+		self.radius = 16 * SIZING
 
 		# Used for holding arms in the air and gettting hurt
 		self.specialFrame = 0
@@ -82,8 +81,7 @@ class Character:
 		self.key_map = { cn : k for cn, k in zip(controls, keys) }
 
 		# Stats
-		self.speed_const = GRATIO / 30
-		self.speed = 2
+		self.speed = 1
 		self.shotRate = 1
 		self.damage = 2
 		self.range = 2
@@ -139,7 +137,7 @@ class Character:
 	def clearTears(self):
 		self.tears = []
 
-	def hurt(self, amount, enemyX, enemyY, *args):
+	def hurt(self, amount, enemyX=None, enemyY=None):
 
 		if self.hurt_timer > 0:
 			return
@@ -147,7 +145,7 @@ class Character:
 
 		self.sounds[randint(0,1)].play() # Play random hurt sound
 
-		leftover = self.hearts[-1].damage(1) # Hurt the last heart
+		leftover = self.hearts[-1].damage(amount) # Hurt the last heart
 		for i in reversed(range(len(self.hearts))):
 			if type(leftover) == bool and leftover: # If the heart should be removed
 				del self.hearts[i] 
@@ -160,7 +158,7 @@ class Character:
 		# Character push back
 		if enemyX != None and enemyY != None:
 			# Push the character away from where they were hurt
-			self.pushback(enemyX, enemyY)
+			self.pushback(enemyX, enemyY, 6)
 
 		# Set character to hurt look
 		self.specialFrame = 2
@@ -169,14 +167,14 @@ class Character:
 		if self.hearts[0].health == 0:
 			self.die()
 
-	def pushback(self, tx, ty, amount=2, maxV=1):
+	def pushback(self, tx, ty, amount=1):
 		dx, dy = self.x - tx, self.y - ty
 
 		# Add the direction to the X and Y velocity
-		dist = sqrt(dx**2 + dy**2) + 1e-7
+		dist = sqrt(dx**2 + dy**2) + 1e-8
 
-		self.xVel += max(-maxV, min(amount * dx / dist, maxV))
-		self.yVel += max(-maxV, min(amount * dy / dist, maxV))
+		self.xVel += 0.15 * amount * dx / dist
+		self.yVel += 0.15 * amount * dy / dist
 
 	def usePill(self):
 		if self.pill != None: # Ensure the character has a pill
@@ -207,18 +205,12 @@ class Character:
 
 	def updateVel(self):
 		# Update the X and Y velocity
-		if self.dirx == 0:
-			self.xVel *= 0.85
-		else:
-			self.xVel += self.dirx * 0.15
+		self.xVel = self.xVel * 0.85 + self.dirx * 0.15
 
-		if self.diry == 0:
-			self.yVel *= 0.85
-		else:
-			self.yVel += self.diry * 0.15
+		self.yVel = self.yVel * 0.85 + self.diry * 0.15
 
-		if self.xVel**2 + self.yVel**2 > 1:
-			dist = (self.xVel**2 + self.yVel**2)**0.5
+		dist = sqrt(self.xVel**2 + self.yVel**2)
+		if dist > 1:
 			self.xVel /= dist
 			self.yVel /= dist
 
@@ -287,8 +279,8 @@ class Character:
 		self.updateTear()
 
 		# Delta x and y
-		dx = self.xVel * (self.speed + 1) / 2 * self.speed_const
-		dy = self.yVel * (self.speed + 1) / 2 * self.speed_const
+		dx = self.xVel * self.speed * GRATIO / 10
+		dy = self.yVel * self.speed * GRATIO / 10
 
 		# Ensure the tear is within the level bounds
 		inBoundsX = bounds.collidepoint(self.x+dx, self.y)
@@ -299,23 +291,24 @@ class Character:
 		obColisionX = False
 		obColisionY = False
 
+		self.check_collision(obsticals)
 		for obj in obsticals:
 			if obj.destroyed:
-				continue
-
-			is_colliding = self.check_collision(16*SIZING, obj)
-			if not is_colliding:
 				continue
 
 			obColisionX |= obj.bounds.collidepoint(self.x+dx, self.y)
 			obColisionY |= obj.bounds.collidepoint(self.x, self.y+dy)
 
-			if isinstance(obj, Fire):
-				self.hurt(1, None, None)
-
 		for obj in pickups:
-			is_colliding = self.check_collision(16*SIZING, obj)
-			if not is_colliding:
+			rect = obj.bounds
+			closest_x = max(rect.left, min(self.x, rect.right))
+			closest_y = max(rect.top, min(self.y, rect.bottom))
+
+			dx = closest_x - self.x
+			dy = closest_y - self.y
+			dr = sqrt(dx**2 + dy**2)
+			
+			if self.radius < dr:
 				continue
 
 			if isinstance(obj, Coin):
@@ -387,20 +380,10 @@ class Character:
 		# Update velocity
 		self.updateVel()
 		
-		if self.hurt_timer > 0:
-			body = self.body.copy()
-			body.fill((50, 0, 0), special_flags=BLEND_RGB_ADD)
-
-			head = self.head.copy()
-			head.fill((50, 0, 0), special_flags=BLEND_RGB_ADD)
-		else:
-			body = self.body
-			head = self.head
-			
 		# Draw characters special frame
 		if self.specialFrame == 0:
-			surface.blit(body, (self.x-32*SIZING, self.y-32*SIZING))
-			surface.blit(head, (self.x-32*SIZING, self.y-52*SIZING))
+			surface.blit(self.body, (self.x-32*SIZING, self.y-32*SIZING))
+			surface.blit(self.head, (self.x-32*SIZING, self.y-52*SIZING))
 		else:
 			surface.blit(self.specialFrames[self.specialFrame-1], (self.x-64*SIZING, self.y-72*SIZING))
 
@@ -425,18 +408,31 @@ class Character:
 
 		return move
 
-	def check_collision(self, radius, ob):
-		rect = ob.bounds
-		closest_x = max(rect.left, min(self.x, rect.right))
-		closest_y = max(rect.top, min(self.y, rect.bottom))
+	def check_collision(self, objects):
 
-		dx = closest_x - self.x
-		dy = closest_y - self.y
+		distance = float('inf')
+		point = None
 
-		is_colliding = dx**2 + dy**2 < radius**2
+		for ob in objects:
+			if not ob.collideable:
+				continue
 
-		if is_colliding and ob.collideable:
-			amount = 1 - sqrt(dx**2 + dy**2) / radius
-			self.pushback(closest_x, closest_y, amount**3, 0.1)
+			rect = ob.bounds
+			closest_x = max(rect.left, min(self.x, rect.right))
+			closest_y = max(rect.top, min(self.y, rect.bottom))
 
-		return is_colliding
+			dx = closest_x - self.x
+			dy = closest_y - self.y
+			dr = sqrt(dx**2 + dy**2)
+
+			if dr < self.radius:
+				ob.collide(self)
+
+			if dr < distance:
+				distance = dr
+				point = (closest_x, closest_y)
+
+		if distance < self.radius:
+			amount = 1 - distance / self.radius
+			tx, ty = point
+			self.pushback(tx, ty, amount)
