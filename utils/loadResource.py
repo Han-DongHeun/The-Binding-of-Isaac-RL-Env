@@ -255,7 +255,7 @@ textures["enemies"].update({
 	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)],
 	"horf" : [textures["enemies"]["horf"].subsurface(0, 0, 64, 64)],
 	"pacer" : [textures["enemies"]["legs"].subsurface(0, 0, 64, 64)],
-	"trite" : [textures["enemies"]["trite"].subsurface(0, 0, 96, 96)],
+	"trite" : [textures["enemies"]["trite"].subsurface(96 * (i % 4), 96 * (i // 4), 96, 96) for i in range(12)],
 })
 
 textures["pickups"] = [textures["pickups"].subsurface(Rect(variant//2*16*2, variant%2*16*2, 16*2, 16*2)) for variant in range(3)]
