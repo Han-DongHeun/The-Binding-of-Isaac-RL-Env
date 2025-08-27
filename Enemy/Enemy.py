@@ -20,9 +20,10 @@ class Enemy:
 	"""Enemy parent class"""
 
 	# Setup
-	texture = None
-	effect = None
-	texture_rect = None
+	texture = Surface((0, 0))
+	effect = Surface((0, 0))
+	texture_rect = Rect(0, 0, 0, 0)
+	effect_rect = Rect(0, 0, 0, 0)
 
 	isFlying = False
 	dead = False
@@ -43,7 +44,7 @@ class Enemy:
 	interval_frame = 4
 
 	frames = None
-	effect_frames = [Surface((0, 0))]
+	effect_frames = [effect]
 
 	dx = dy = 0
 

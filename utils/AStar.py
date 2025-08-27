@@ -86,7 +86,6 @@ class AStarGridNode(AStarNode):
 
 def make_graph(mapinfo):
     obstacles = set((ob.gx, ob.gy) for ob in mapinfo['obstacle'])
-    print(obstacles)
     nodes = [[AStarGridNode(x, y) for y in range(mapinfo['height'])] for x in range(mapinfo['width'])]
     graph = {}
     for x, y in product(range(mapinfo['width']), range(mapinfo['height'])):
