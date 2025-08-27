@@ -5,4 +5,4 @@ class Pooter(Enemy):
 	health = 12
 	isFlying = True
 
-	texture = textures["enemies"]["pooter"][0]
+	frames = textures["enemies"]["pooter"]

@@ -5,7 +5,7 @@ class Horf(Enemy):
     health = 12
     isFlying = True
 
-    texture = textures["enemies"]["horf"][0]
+    frames = textures["enemies"]["horf"]
 
     def move(self, *args):
         pass

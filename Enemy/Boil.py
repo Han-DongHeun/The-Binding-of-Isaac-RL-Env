@@ -15,6 +15,7 @@ class Boil(Enemy):
 	health = 10
 	max_health = 10
 	interval_frame = 60
+	frames = textures["enemies"]["boil"]
 
 	def move(self, *args):
 		pass

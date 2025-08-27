@@ -17,7 +17,6 @@ class Trite(Enemy):
     flying = 2
     falling = 3
 
-    dx = dy = None
     time = 0
 
     waiting_time = 20

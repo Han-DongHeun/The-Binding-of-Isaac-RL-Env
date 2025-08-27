@@ -21,7 +21,8 @@ class Enemy:
 
 	# Setup
 	texture = None
-	rect = None
+	effect = None
+	texture_rect = None
 
 	isFlying = False
 	dead = False
@@ -29,7 +30,6 @@ class Enemy:
 	health = 1
 	weight = 1
 	speed = SIZING
-
 
 	damage = 1
 	tear_damage = 1
@@ -43,6 +43,9 @@ class Enemy:
 	interval_frame = 4
 
 	frames = None
+	effect_frames = [Surface((0, 0))]
+
+	dx = dy = 0
 
 	def __init__(self, xy):
 		self.path = []
@@ -77,7 +80,7 @@ class Enemy:
 		# Check if character should be hit
 		for tear in self.tears:
 			dist = sqrt((tear.x - character.x)**2 + (tear.y - character.y)**2)
-			if dist < character.hurtDistance and tear.check_collision():
+			if dist < character.radius and tear.check_collision():
 				character.hurt(tear.damage, tear.x, tear.y)
 				tear.pop(True)
 
@@ -96,28 +99,26 @@ class Enemy:
 
 	def move(self):
 		if self.isFlying:
-			dx, dy = self.cx - self.x, self.cy - self.y
+			self.dx, self.dy = self.cx - self.x, self.cy - self.y
 
 		elif len(self.path) > 0:
 			# MOVE TO NEXT PATH
 
-			dx, dy = self.path[0][0] - self.x, self.path[0][1] - self.y
+			tx, ty = get_center(*self.path[0])
+			self.dx, self.dy = tx - self.x, ty - self.y
 
-			if sqrt(dx**2 + dy**2) < 0.15:
+			if sqrt(self.dx**2 + self.dy**2) < 0.05 * GRATIO:
 				self.path = self.path[1:]
 
 		else:
 			return
 		
 		# Move ratios
-		dist = sqrt(dx**2 + dy**2) + 1e-8
-		
-		rx = dx / dist
-		ry = dy / dist
+		dist = sqrt(self.dx**2 + self.dy**2) + 1e-8
 
 		# Move character
-		self.x += self.speed * rx
-		self.y += self.speed * ry
+		self.x += self.speed * self.dx / dist
+		self.y += self.speed * self.dy / dist
 
 	def pathFind(self, nodes, paths):
 		# Do pathfinding
@@ -147,7 +148,10 @@ class Enemy:
 		gx, gy = (self.x - GRIDX) // GRATIO, (self.y - GRIDY) // GRATIO
 		gx, gy = clamp(int(gx), 0, 12), clamp(int(gy), 0, 6)
 
-		self.path = [random.choice(paths.graph[nodes[gx][gy]])]
+		node = random.choice(paths.graph[nodes[gx][gy]])
+		path = [(node.x, node.y)]
+
+		return path
 
 	def render(self, surface, character, nodes, paths, bounds, obsticals):
 
@@ -166,11 +170,16 @@ class Enemy:
 				self.tears.remove(tear)
 
 		self.update()
-		surface.blit(self.texture, self.rect)
+		surface.blit(self.texture, self.texture_rect)
+		surface.blit(self.effect, self.effect_rect)
 
 		self.current_frame += 1
 
 		return not self.dead
 	
-	def update(self) -> Surface:
-		self.rect = self.texture.get_rect(center=(self.x, self.y))
+	def update(self):
+		frame_idx = self.current_frame // self.interval_frame
+		self.texture = self.frames[frame_idx % len(self.frames)]
+		self.effect = self.effect_frames[frame_idx % len(self.effect_frames)]
+		self.texture_rect = self.texture.get_rect(center=(self.x, self.y))
+		self.effect_rect = self.effect.get_rect(center=(self.x, self.y))

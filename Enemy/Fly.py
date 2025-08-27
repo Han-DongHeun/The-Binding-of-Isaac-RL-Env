@@ -15,7 +15,7 @@ class Fly(Enemy):
 	weight = 1
 	hurtDistance = 40 * SIZING
 
-	texture = textures["enemies"]["fly"][0]
+	frames = textures["enemies"]["fly"]
 	
 	def checkTear(self):
 		pass

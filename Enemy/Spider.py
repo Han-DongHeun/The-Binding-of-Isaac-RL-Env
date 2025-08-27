@@ -4,7 +4,7 @@ class Spider(Enemy):
     hurtDistance = 50 * SIZING
     health = 12
 
-    texture = textures["enemies"]["spider"][0]
+    frames = textures["enemies"]["spider"]
 
     def checkTear(self):
         pass

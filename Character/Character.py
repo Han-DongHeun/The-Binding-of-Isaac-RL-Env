@@ -96,7 +96,7 @@ class Character:
 		self.tear_timer = 0
 		self.max_tear_timer = 40
 		self.hurt_timer = 0
-		self.max_hurt_timer = 30
+		self.max_hurt_timer = 60
 		self.pickup_timer = 0
 		self.max_pickup_timer = 240
 
@@ -143,6 +143,7 @@ class Character:
 		self.tears = []
 
 	def hurt(self, amount, enemyX=None, enemyY=None):
+		amount = 1
 
 		if self.hurt_timer > 0:
 			return

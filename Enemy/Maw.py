@@ -11,3 +11,5 @@ class Maw(Enemy):
 	hurtDistance = 50 * SIZING
 	health = 12
 	isFlying = True
+
+	textures = textures["enemies"]["maw"]

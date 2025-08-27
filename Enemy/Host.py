@@ -16,6 +16,7 @@ class Host(Enemy):
 	last_frame = 0
 	standing_frame = 60
 	down_frame = 90
+	frames = textures["enemies"]["host"]
 
 	def hurt(self, amount):
 		if self.standing:
