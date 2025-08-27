@@ -51,11 +51,12 @@ class UIPickup:
 
 	font = fonts["pickups"]
 
-	def __init__(self, variant):
-		self.variant = variant
+	def __init__(self, idx, name):
+		self.name = name
+		self.idx = idx
 		self.score = 1
 
-		self.texture = textures["pickups"][variant]
+		self.texture = textures["pickups"][name]
 		self.updateDigits()
 
 	def updateDigits(self):
@@ -77,6 +78,6 @@ class UIPickup:
 
 	def render(self, surface):
 		# Blit icon, digit1, and digit 2
-		surface.blit(self.texture, (40 * SIZING, (88 + 24*self.variant) * SIZING))
-		surface.blit(self.digit1, (68 * SIZING, (94 + 24*self.variant) * SIZING))
-		surface.blit(self.digit2, (80 * SIZING, (94 + 24*self.variant) * SIZING))
+		surface.blit(self.texture, (40 * SIZING, (88 + 24*self.idx) * SIZING))
+		surface.blit(self.digit1, (68 * SIZING, (94 + 24*self.idx) * SIZING))
+		surface.blit(self.digit2, (80 * SIZING, (94 + 24*self.idx) * SIZING))

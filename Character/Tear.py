@@ -17,10 +17,10 @@ class Tear:
 	"""Main tear class"""
 
 	textures = textures["tears"]
-	frames = textures["frames"]
+	tear_pop = textures["tearPop"]
 	sounds = sounds["tear"]
 	
-	frame_inteval = 2
+	pop_inteval = 2
 	current_frame = 0
 
 	def __init__(self, xyv, xy, ixyv, speed, damage, shotRange, friendly):
@@ -48,7 +48,8 @@ class Tear:
 		self.sounds[randint(0,1)].play()
 
 		# Texture setup
-		self.texture = self.textures["tear"] if friendly else self.textures["blood"]
+		self.frames = self.textures["tear"] if friendly else self.textures["blood"]
+		self.texture = self.frames[5]
 		self.rect = self.texture.get_rect(center=xy)
 
 		self.h0 = 0.5
@@ -65,7 +66,7 @@ class Tear:
 		self.rect.center = (self.x, self.y - self.h * GRATIO)
 
 	def step(self):
-		self.texture = self.frames[self.frameIndex]
+		self.texture = self.tear_pop[self.frameIndex]
 		self.frameIndex += 1
 
 	def check_collision(self):
@@ -83,11 +84,11 @@ class Tear:
 	def render(self, surface, bounds, obsticals):
 		if self.poped:
 			# Return popping tear
-			frame_idx = self.current_frame // self.frame_inteval
-			if frame_idx >= len(self.frames):
+			frame_idx = self.current_frame // self.pop_inteval
+			if frame_idx >= len(self.tear_pop):
 				return False
 			
-			texture = self.frames[frame_idx]
+			texture = self.tear_pop[frame_idx]
 			self.rect = texture.get_rect(center = (self.x, self.y - self.h * GRATIO))
 			surface.blit(texture, self.rect)
 

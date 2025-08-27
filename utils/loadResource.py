@@ -2,6 +2,8 @@ from pygame import *
 from utils.const import *
 import os
 
+from functools import lru_cache
+
 def darken(image, amount):
     "Darken the image but preseve transparency"
 
@@ -14,23 +16,96 @@ def darken(image, amount):
 
     return darkened_image
 
-def loadTexture(name, dir=None, double=True):
-    # Load texture and double its size
+@lru_cache(maxsize=16)
+def loadImage(path):
+	full_path = os.path.join('res', 'textures', *path.split('/'))
+	texture = image.load(full_path).convert_alpha()
 
-    if dir != None:
-        t = image.load(os.path.join('res', 'textures', dir, name))
+	return texture
 
-    else:
-        t = image.load(os.path.join('res','textures', name))
+def loadTexture(path, topleft=(0, 0), cell_size=None, scale_factor=SIZING*2):
+	texture = loadImage(path)
+	if cell_size != None:
+		texture = texture.subsurface(topleft, cell_size)
 
-    w = t.get_width()
-    h = t.get_height()
+	w, h = texture.get_size()
+	scaled_size = (w * scale_factor, h * scale_factor)
 
-    if double:
-        w *= 2
-        h *= 2
+	texture = transform.scale(texture, scaled_size)
 
-    return transform.scale(t, (w, h))
+	return texture
+
+@lru_cache(maxsize=16)
+def loadTextures(path, topleft, cell_size, grid_size, scale_factor=SIZING*2):
+	spritesheet = loadImage(path)
+
+	x, y = topleft
+	w, h = cell_size
+	r, c = grid_size
+
+	scaled_size = (w * scale_factor, h * scale_factor)
+
+	textures = [
+		transform.scale(spritesheet.subsurface(x + j * w, y + i * h, w, h), scaled_size) 
+		for i in range(r) for j in range(c)
+		]
+
+	return textures
+
+class DummySound:
+	def play(self, *args):
+		pass
+
+	def stop(self, *args):
+		pass
+
+def loadSound(path, sound_on=HUMAN_MODE):
+	if sound_on:
+		s = mixer.Sound(os.path.join('res','sounds', *path.split('/')))
+	else:
+		s = DummySound()
+
+	return s
+
+def loadCFont(path, total, cell_size, scale_factor=SIZING*2):
+	# Load custom font
+
+	full_path = os.path.join('res', 'fonts', *path.split('/'))
+	spritesheet = image.load(full_path).convert_alpha()
+
+	w, h = cell_size
+
+	scaled_size = (w * scale_factor, h * scale_factor)
+
+	digits = [
+		transform.scale(spritesheet.subsurface(w * i, 0, w, h), scaled_size)
+		for i in range(total)
+		]
+	space = Surface(scaled_size).convert_alpha()
+	space.fill((0,0,0,0))
+
+	digits.append(space)
+
+	return digits
+
+fonts = {
+	"main": loadCFont("main.png", 20, (36, 16)),
+	"pickups": loadCFont("pickup.png", 10, (10, 12)),
+	"ticks": loadCFont("ticks.png", 4, (8, 17)),
+}
+
+alph = "abcdefghijklmnopqrstuvwxyz0123456789 "
+def write(text, font, alph=alph, dark=.8):
+	# Create surface with special font
+
+	width = font[0].get_width()
+	height = font[0].get_height()
+
+	writing = Surface((width*len(text), height)).convert_alpha()
+	writing.fill((0,0,0,0))
+	for i in range(len(text)):
+		writing.blit(font[alph.index(text[i].lower())], (i*width, 0))
+	return darken(writing, dark)
 
 def resizing(textures, rate=SIZING):
 	if isinstance(textures, Surface):
@@ -41,232 +116,98 @@ def resizing(textures, rate=SIZING):
 		return [resizing(texture, rate) for texture in textures]
 	elif isinstance(textures, dict):
 		return {name : resizing(texture, rate) for name, texture in textures.items()}
-	else:
-		raise TypeError(f"Unsupported type for resizing: {type(textures).__name__}")
-
-class DummySound:
-	def play(self, *args):
-		pass
-
-	def stop(self, *args):
-		pass
-
-def loadSound(name, sound_on=HUMAN_MODE):
-	if sound_on:
-		s = mixer.Sound(os.path.join('res','sounds', name))
-	else:
-		s = DummySound()
-
-	return s
-
-def loadCFont(name, width, height, total, size=2):
-	# Load custom font
-
-	f = image.load(os.path.join('res', 'fonts', name))
-	digits = [transform.scale(f.subsurface(width*i, 0, width, height), list(map(int,(width*size, height*size)))) for i in range(total)]
-	space = Surface((width, height)).convert_alpha()
-	space.fill((0,0,0,0))
-	digits.append(space)
-
-	return digits
-
-fonts = {
-	"main": loadCFont("main.png", 20, 16, 36, size=1.8),
-	"pickups": loadCFont("pickup.png", 10, 12, 10),
-	"ticks": loadCFont("ticks.png", 4, 17 , 8),
-}
-fonts = resizing(fonts)
-
-alph = "abcdefghijklmnopqrstuvwxyz0123456789 "
-def write(text, font, alph=alph, dark=.8):
-	# Create surface with special font
-
-	width = font[0].get_width()
-	height = font[0].get_height()
-	writing = Surface((width*len(text), height)).convert_alpha()
-	writing.fill((0,0,0,0))
-	for i in range(len(text)):
-		writing.blit(font[alph.index(text[i].lower())], (i*width, 0))
-	return darken(writing, dark)
 
 # Load all needed textures
 textures = {
-    # --- 캐릭터 및 UI 관련 ---
-    "arrow": loadTexture("arrow.png", dir="pause", double=False),
-    "character": {
-		"lazarus": darken(loadTexture("lazarus.png"), 0.1),
-        "isaac": darken(loadTexture("isaac.png"), 0.1),
-        "eve": darken(loadTexture("eve.png"), 0.1),
-    },
+    "arrow": loadTexture("pause/arrow.png"),
+    "isaac": {
+		"heads" : loadTextures("isaac.png", (0, 0), (32, 32), (1, 6))[0::2],
+		"tearHeads" : loadTextures("isaac.png", (0, 0), (32, 32), (1, 6))[1::2],
+		"feet" : loadTextures("isaac.png", (0, 32), (32, 32), (2, 8)),
+		"specialFrames" : loadTextures("isaac.png", (0, 32 * 4), (64, 64), (3, 4)),
+	},
     "controls": loadTexture("controls.png"),
     "tears": {
-        "tears": loadTexture("tears.png"),
-        "tear_pop": loadTexture("tear_pop.png"),
+		"tearPop" : loadTextures("tear_pop.png", (0, 0), (64, 64), (3, 4)),
+		"tear" : loadTextures("tears.png", (0, 0), (32, 32), (2, 8))[:13],
+		"blood" : loadTextures("tears.png", (0, 64), (32, 32), (2, 8))[:13],
     },
-    "hearts": loadTexture("hearts.png"),
-    "loading": [loadTexture(f"{i+1}.png", dir="loading") for i in range(56)],
+    "hearts": [
+		loadTextures("hearts.png", (0, 0), (16, 16), (1, 3))[::-1],
+		loadTextures("hearts.png", (0, 16), (16, 16), (1, 2))[::-1],
+		loadTextures("hearts.png", (32, 16), (16, 16), (1, 2))[::-1],
+	],
+    "loading": [loadTexture(f"loading/{i+1}.png") for i in range(56)],
     "map": {
-        "background": loadTexture("minimap.png").subsurface(0, 0, 112, 102),
-        "boss": loadTexture("minimap.png").subsurface(113, 64, 16, 16),
-        "in": loadTexture("minimap.png").subsurface(113, 0, 16, 16),
-        "entered": loadTexture("minimap.png").subsurface(113, 16, 16, 16),
-        "item": loadTexture("minimap.png").subsurface(113, 48, 16, 16),
-        "seen": loadTexture("minimap.png").subsurface(113, 32, 16, 16),
+        "background": loadTexture("minimap.png", cell_size=(56, 51)),
+        "in": loadTexture("minimap.png", (56, 0), (8, 8)),
+        "entered": loadTexture("minimap.png", (56, 8), (8, 8)),
+        "seen": loadTexture("minimap.png", (56, 16), (8, 8)),
+        "item": loadTexture("minimap.png", (56, 24), (8, 8)),
+        "boss": loadTexture("minimap.png", (56, 32), (8, 8)),
     },
-    "overlays": [loadTexture(f"{i}.png", dir="overlays") for i in range(5)],
-    "pauseCard": loadTexture("pauseCard.png", dir="pause"),
-    "seedCard": loadTexture("seedcard.png", dir="pause"),
+    "overlays": [loadTexture(f"overlays/{i}.png") for i in range(5)],
+    "pauseCard": loadTexture("pause/pauseCard.png"),
+    "seedCard": loadTexture("pause/seedcard.png"),
     "shading": loadTexture("shading.png"),
     
-    # --- 맵 및 환경 요소 ---
     "doors": {
-        "angel_door": darken(loadTexture("angel_door.png"), 0.25),
-        "boss_door": darken(loadTexture("boss_door.png"), 0.25),
-        "dark_door": darken(loadTexture("dark_door.png"), 0.25),
-        "devil_door": darken(loadTexture("devil_door.png"), 0.25),
-        "door": darken(loadTexture("door.png"), 0.25),
-        "red_door": darken(loadTexture("red_door.png"), 0.25),
-        "treasure_door": darken(loadTexture("treasure_door.png"), 0.25),
+		name : dict(zip(("doorFrame", "doorBack", "lDoor", "rDoor", "brokenDoor", "lockedDoor"), loadTextures(name+'.png', (0, 0), (64, 48), (3, 2))))
+		for name in ("door", "treasure_door", "boss_door")
     },
     "fires": {
-        "fire_bottom": loadTexture("fire_bottom.png"),
-        "fire_top": loadTexture("fire_top.png"),
+		"fireFrames" : [resizing(loadTextures("fire_top.png", (0, 0), (48, 48), (1, 6)), rate=0.8**(4-health)) for health in range(5)],
+		"woodFrames" : [loadTextures('fire_bottom.png', (x, y), (32, 32), (2, 2)) for x, y in ((0, 0), (64, 0), (0, 64))],
     },
     "floors": {
-        "basement": loadTexture("basement.png").subsurface(0, 0, 221 * 2, 143 * 2),
-        "catacombs": loadTexture("catacombs.png").subsurface(0, 0, 221, 143),
-        "caves": loadTexture("caves.png").subsurface(0, 0, 221, 143),
-        "depths": loadTexture("depths.png").subsurface(0, 0, 221, 143),
-        "necropolis": loadTexture("necropolis.png").subsurface(0, 0, 221, 143),
-        "shop": loadTexture("shop.png").subsurface(0, 0, 221, 143),
-        "utero": loadTexture("utero.png").subsurface(0, 0, 221, 143),
-        "womb": loadTexture("womb.png").subsurface(0, 0, 221, 143),
+		name : loadTexture(name + '.png', (0, 0), (221, 143))
+		for name in ("basement", "catacombs", "caves", "depths", "necropolis", "shop", "utero", "womb")
     },
-    "poops": loadTexture("poops.png"),
-    "rocks": darken(loadTexture("rocks.png"), 0.1),
+    "poops": [loadTextures("poops.png", (0, variant * 32), (32, 32), (1, 5)) for variant in range(5)],
+    "rocks": {
+		"rock" : loadTextures("rocks.png", (0, 0), (32, 32), (1, 3)),
+		"broken" : loadTexture("rocks.png", (32 * 3, 0), (32, 32)),
+	},
     "trapdoor": loadTexture("trap_door.png"),
 
     # --- 아이템 및 픽업류 ---
     "bombs": {
-        "bombs": loadTexture("bombs.png").subsurface(0,0,64,64),
-        "explosion": loadTexture("explosion.png"),
-        "smut": loadTexture("smut.png"),
+        "bombs": loadTexture("bombs.png", (0, 0), (32, 32)),
+		"explosion" : loadTextures("explosion.png", (0, 0), (96, 96), (3, 4)),
+		"smut" : loadTextures("smut.png", (0, 0), (96, 64), (3, 3))[:8],
     },
     "coins": {
-        "dime": loadTexture("dime.png"),
-        "nickel": loadTexture("nickel.png"),
-        "penny": loadTexture("penny.png"),
+		name : loadTextures(name + '.png', (0, 0), (64, 64), (1, 6)) for name in ("dime", "nickel", "penny")
     },
-    "keys": loadTexture("keys.png").subsurface(0,0,32,64),
+    "keys": loadTexture("keys.png", (0, 0), (16, 32)),
     "phd": loadTexture("phd.png"),
-    "pickupHearts": loadTexture("pickup_hearts.png"),
-    "pickups": loadTexture("pickups.png"),
+    "pickupHearts": [loadTextures("pickup_hearts.png", (0, 32 * variant), (32, 32), (1, 2)) for variant in range(3)],
+    "pickups": dict(zip(("coin", "bomb", "key"), loadTextures("pickups.png", (0, 0), (16, 16), (2, 2)))),
     "pills": loadTexture("pills.png"),
 
     # --- 적 및 보스 ---
     "bosses": {
-        "duke": loadTexture("duke.png", dir="bosses"),
-        "gurdy": loadTexture("gurdy.png", dir="bosses"),
+        "duke": loadTextures("bosses/duke.png", (0, 0), (80, 64), (2, 2)),
+        #"gurdy": loadTexture("gurdy.png", dir="bosses"),
     },
     "enemies": {
-        "boil": loadTexture("boil.png", dir="enemies"),
-        "fly": loadTexture("fly.png", dir="enemies"),
-        "host": loadTexture("host.png", dir="enemies"),
-        "maw": loadTexture("maw.png", dir="enemies"),
-		"horf" : loadTexture("horf.png", dir="enemies"),
-        "pooter": loadTexture("pooter.png", dir="enemies"),
-		"legs" : loadTexture("legs.png", dir="enemies"),
-		"spider" : loadTexture("spider.png", dir="enemies"),
-		"bigSpider" : loadTexture("bigSpider.png", dir="enemies"),
-		"trite" : loadTexture("trite.png", dir="enemies")
+		"fly" : loadTextures("enemies/fly.png", (0, 0), (32, 32), (1, 2)),
+		"attackFly" : loadTextures("enemies/fly.png", (0, 32), (32, 32), (1, 2)),
+		"pooter" : loadTextures("enemies/pooter.png", (0, 0), (32, 32), (1, 2)),
+		"boil" : loadTextures("enemies/boil.png", (0, 0), (32, 32), (3, 4))[:10],
+		"host" : loadTextures("enemies/host.png", (0, 0), (32, 64), (1, 3)),
+		"maw" : loadTextures("enemies/maw.png", (0, 0), (32, 32), (1, 1)),
+		"horf" : loadTextures("enemies/horf.png", (0, 0), (32, 32), (2, 2))[:3],
+		"legs" : loadTextures("enemies/legs.png", (0, 0), (32, 32), (5, 4)),
+		"gusherEffect" : loadTextures("enemies/legs.png", (128, 0), (32, 32), (4, 2)),
+		"spider" : loadTextures("enemies/spider.png", (32, 0), (32, 16), (4, 1)),
+		"bigSpider" : loadTextures("enemies/bigSpider.png", (32, 0), (32, 16), (4, 1)),
+		"trite" : loadTextures("enemies/trite.png", (0, 0), (48, 48), (3, 4)),
     },
     
     # --- 기타 효과 ---
     "streak": loadTexture("streak.png"),
 }
-
-textures["character"].update({
-	name : {
-		"heads" : [texture.subsurface(Rect((i*64)*2, 0, 64, 64)) for i in range(3)] + \
-			[transform.flip(texture.subsurface(Rect((1*64)*2, 0, 64, 64)), True, False)],
-		"tearHeads" : [texture.subsurface(Rect(64 + (i*64)*2, 0, 64, 64)) for i in range(3)] + \
-			[transform.flip(texture.subsurface(Rect((64 + 1*64)*2, 0, 64, 64)), True, False)],
-		"feet" : [
-			[texture.subsurface(Rect((i*64), 64, 64, 64)) for i in range(8)],
-			[texture.subsurface(Rect((i*64), 64*2, 64, 64)) for i in range(8)],
-			[texture.subsurface(Rect((i*64), 64, 64, 64)) for i in range(8)],
-			[transform.flip(texture.subsurface(Rect((i*64), 64*2, 64, 64)), True, False) for i in range(8)],
-		],
-		"specialFrames" : [texture.subsurface(i*128, 272+128, 128, 128) for i in (1, 2)],
-	} for name, texture in textures["character"].items()
-})
-
-textures["tears"].update({
-	"frames" : [textures["tears"]["tear_pop"].subsurface(Rect((i*128 - ((i)//4)*128*4), ((i//4)*128), 128, 128)) for i in range(12)],
-	"tear" : textures["tears"]["tears"].subsurface(Rect(5 * 64, 0, 64, 64)),
-	"blood" : textures["tears"]["tears"].subsurface(Rect(5 * 64, 2 * 64, 64, 64))
-})
-
-textures["rocks"] = {
-	"rock" : [textures["rocks"].subsurface(Rect((variant*64), 0, 64, 64)) for variant in range(3)],
-	"broken" : textures["rocks"].subsurface(Rect((3*64), 0, 64, 64)),
-}
-
-textures["poops"] = [[textures["poops"].subsurface(Rect((health * 64), variant*64, 64, 64)) for health in reversed(range(5))] for variant in (0, 1, 3)]
-
-textures["fires"] = {
-	"fireFrames" : [
-		resizing(
-			[textures["fires"]["fire_top"].subsurface(Rect(96*i, 0, 96, 104)) for i in range(6)],
-			rate=0.8**(4-health))
-		for health in range(5)],
-	"woodFrames" : [
-		[textures["fires"]["fire_bottom"].subsurface(Rect((64*i - (i//2)*128)+xMod, (i//2)*64+yMod, 64, 64)) for i in range(4)]
-		for xMod, yMod in ((0, 0), (64 * 2, 0), (0, 64 * 2))
-	]
-}
-
-textures["doors"] = {
-	name : {
-		"doorFrame" : texture.subsurface(0, 0, 64*2, (48 - 6)*2),
-		"doorBack" : texture.subsurface(64*2, 0, 64*2, (48 - 6)*2),
-		"lDoor" : texture.subsurface(0, 48*2, 64*2, (48 - 6)*2),
-		"rDoor" : texture.subsurface(64*2, 48*2, 64*2, (48 - 6)*2),
-		"lockedDoor" : texture.subsurface(64*2, 96*2, 64*2, (48 - 6)*2),
-	} for name, texture in textures["doors"].items() if name != "angel_door" and name != "devil_door"
-}
-
-textures["pickupHearts"] = [textures["pickupHearts"].subsurface(0,64*variant,64,64) for variant in range(3)]
-
-textures["coins"] = {
-	name : [texture.subsurface(i*128, 0, 128, 128) for i in range(6)]
-		for name, texture in textures["coins"].items()
-}
-
-textures["bombs"]["explosion"] = [textures["bombs"]["explosion"].subsurface(192 * (i % 4), 192 * (i // 4), 192, 192) for i in range(12)]
-textures["bombs"]["smut"] = [textures["bombs"]["smut"].subsurface(192*x, 128*y, 192, 128) for x, y in ((0, 0), (1, 0), (0, 1), (1, 1))]
-
-textures["enemies"].update({
-	"fly" : [textures["enemies"]["fly"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
-	"attackFly" : [textures["enemies"]["fly"].subsurface(i * 64, 64, 64, 64) for i in range(2)],
-	"pooter" : [textures["enemies"]["pooter"].subsurface(i * 64, 0, 64, 64) for i in range(2)],
-	"boil" : [textures["enemies"]["boil"].subsurface(64 * (i % 4), 64 * (i // 4), 64, 64) for i in reversed(range(10))],
-	"host" : [textures["enemies"]["host"].subsurface(i*64, 0, 64, 128) for i in range(2)],
-	"maw" : [textures["enemies"]["maw"].subsurface(0, 0, 64, 64)],
-	"horf" : [textures["enemies"]["horf"].subsurface(0, 0, 64, 64)],
-	"pacer" : [textures["enemies"]["legs"].subsurface(0, 0, 64, 64)],
-	"trite" : [textures["enemies"]["trite"].subsurface(96 * (i % 4), 96 * (i // 4), 96, 96) for i in range(12)],
-})
-
-textures["pickups"] = [textures["pickups"].subsurface(Rect(variant//2*16*2, variant%2*16*2, 16*2, 16*2)) for variant in range(3)]
-
-textures["hearts"] = [
-	[textures["hearts"].subsurface(16 * 2 * (2 - health), 0, 16 * 2, 16 * 2) for health in range(3)],
-	[textures["hearts"].subsurface(16 * 2 * (1 - health), 16 * 2, 16 * 2, 16 * 2) for health in range(2)],
-	[textures["hearts"].subsurface(16 * 2 * (3 - health), 16 * 2, 16 * 2, 16 * 2) for health in range(2)]
-]
-	
-textures = resizing(textures)
 
 # Load all sounds we need
 sounds = {

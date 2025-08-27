@@ -5,8 +5,8 @@
 # This file stores all of the constant information for the game, such as width
 # and height of the window.
 
-WIDTH  = 960 * 2
-HEIGHT = 540 * 2
+WIDTH  = 960
+HEIGHT = 540
 
 WSIZE = WIDTH // 960
 HSIZE = HEIGHT // 540

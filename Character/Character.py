@@ -31,7 +31,7 @@ class Character:
 	def __init__(self, variant, xy, controls, textures, sounds):
 		self.variant = variant
 		self.x, self.y = xy
-		self.textures = textures["character"][variant]
+		self.textures = textures["isaac"]
 
 		# Record import sounds and textures
 		self.heartTextures = textures["hearts"]
@@ -47,10 +47,15 @@ class Character:
 		self.hearts = [UIHeart(0, 2) for _ in range(3)]
 
 		# Head, shoulders knees and toes, knees and toes!
-		self.heads = self.textures["heads"]
-		self.tearHeads = self.textures["tearHeads"]
-		self.feet = self.textures["feet"]
-		self.specialFrames = self.textures["specialFrames"]
+		self.heads = self.textures["heads"] + [transform.flip(self.textures["heads"][1], True, False)]
+		self.tearHeads = self.textures["tearHeads"] + [transform.flip(self.textures["tearHeads"][1], True, False)]
+		self.feet = [
+			self.textures["feet"][:8],
+			self.textures["feet"][8:16],
+			self.textures["feet"][:8],
+			list(map(lambda texture : transform.flip(texture, True, False), self.textures["feet"][8:16]))
+		]
+		self.specialFrames = self.textures["specialFrames"][5:7]
 		self.specialFrames[1].fill((10, 0, 0), special_flags=BLEND_RGB_ADD)
 
 		# The rect for the characters body
@@ -91,14 +96,14 @@ class Character:
 		self.tear_timer = 0
 		self.max_tear_timer = 40
 		self.hurt_timer = 0
-		self.max_hurt_timer = 60
+		self.max_hurt_timer = 30
 		self.pickup_timer = 0
 		self.max_pickup_timer = 240
 
 		self.tear_idx = None
 
 		# The Pickups isaac has picked up
-		self.pickups = [UIPickup(variant) for variant in range(3)]
+		self.pickups = [UIPickup(i, name) for i, name in enumerate(("coin", "bomb", "key"))]
 
 	def heal(self, ammount, variant):
 		# Heal character
@@ -141,7 +146,7 @@ class Character:
 
 		if self.hurt_timer > 0:
 			return
-		self.hurt_timer = 60
+		self.hurt_timer = self.max_hurt_timer
 
 		self.sounds[randint(0,1)].play() # Play random hurt sound
 
