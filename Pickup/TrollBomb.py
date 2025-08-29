@@ -1,26 +1,27 @@
 from pygame import *
 from random import randint
 from math import *
-from utils.Animation import *
 from Pickup.Pickup import *
 from utils.func import get_center
+from utils.loadResource import textures, sounds
 
 class TrollBomb:
+
+	textures = textures["bombs"]
+	texture = textures["bombs"]
+	explode_texture = textures["smut"][randint(0, 3)]
+	anim = textures["explosion"]
+
+	sound = sounds["explosion"]
 	
-	def __init__(self, parent, variant, xy, sounds, textures, character):
+	def __init__(self, room, xy, character):
 		self.character = character
 		self.x, self.y = xy
 
-		self.sounds = sounds
-		self.parent = parent
+		self.room = room
 		
-		self.texture = textures["bombs"]
 		self.texture_rect = self.texture.get_rect(center=get_center(*xy))
-		
-		self.explode_texture = textures["smut"][randint(0, 3)]
 		self.explode_rect = self.explode_texture.get_rect(center=get_center(*xy))
-
-		self.anim = textures["explosion"]
 		self.anim_rect = self.anim[0].get_rect(center=get_center(*xy))
 		
 		self.current_frame = 0
@@ -29,12 +30,12 @@ class TrollBomb:
 
 		self.bounds = self.texture.get_rect(center=get_center(*xy))
 		
-		sounds[0].play()
+		self.sound.play()
 
 	def explode(self):
 		# Explode bomb, draw the stain on the background
-		self.parent.backdrop.blit(self.explode_texture, self.explode_rect)
-		for ob in self.parent.obstacles:
+		self.room.backdrop.blit(self.explode_texture, self.explode_rect)
+		for ob in self.room.obstacles:
 			if sqrt((ob.gx-self.x)**2 + (ob.gy-self.y)**2) < 2:
 				# Try to hur the enemy, if its not an entity, destroy it
 				try:

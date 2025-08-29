@@ -6,20 +6,14 @@
 # the popular game The Binding waof Isaac: Rebirth.
 # 
 
-from utils.const import *
-from pygame import *
-init()
-screen = display.set_mode((WIDTH, HEIGHT))
-
-from utils.loadResource import *
-from random import *
-from utils.func import *
-from Game import *
-from Menu.menu import *
 import os
 
+from pygame import *
 
-# Create display
+from utils.const import *
+
+init()
+screen = display.set_mode((WIDTH, HEIGHT))
 
 def playMusic(name, sound_on=HUMAN_MODE):
 	if sound_on == False:
@@ -29,7 +23,9 @@ def playMusic(name, sound_on=HUMAN_MODE):
 
 # Setup display
 display.set_caption("The Binding of Isaac: Rebirth")
-display.set_icon(image.load(os.path.join('res','textures', 'icon.png')))
+display.set_icon(image.load(os.path.join('res', 'textures', 'icon.png')))
+
+from Game import Game
 
 # Begin main loop
 running = True
@@ -37,18 +33,11 @@ while running:
 	# Start by playing the title screen music
 	playMusic("titleScreenLoop.ogg")
 
-	# Begin menu
-	characterType, controls, floorSeed = menu(screen, sounds)
-	characterType = ("lazarus", "isaac", "eve")[characterType]
-
-	# Floor setup
-	seed(floorSeed)
-
 	# Play the normal game music
 	playMusic("basementLoop.ogg")
 
 	# Start game
-	game = Game(characterType, controls, floorSeed)
-	game.run(screen, sounds, textures)
+	game = Game(screen)
+	game.run()
 
 quit()

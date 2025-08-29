@@ -124,5 +124,10 @@ def get_center(x=6, y=3):
 	centery = GRIDY + (y + 0.5) * GRATIO
 	return (centerx, centery)
 
+def get_grid_coord(x, y):
+	gx = (x - GRIDX) // GRATIO 
+	gy = (y - GRIDX) // GRATIO
+	return (int(gx), int(gy))
+
 def clamp(v, min_v, max_v):
 	return max(min_v, min(max_v, v))

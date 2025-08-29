@@ -26,16 +26,24 @@ from Room.Door import Door
 class Character:
 	"""The main class for Isaac"""
 
+	textures = textures["isaac"]
+	heads = textures["heads"] + [transform.flip(textures["heads"][1], True, False)]
+	tearHeads = textures["tearHeads"] + [transform.flip(textures["tearHeads"][1], True, False)]
+	feet = [
+		textures["feet"][:8],
+		textures["feet"][8:16],
+		textures["feet"][:8],
+		list(map(lambda texture : transform.flip(texture, True, False), textures["feet"][8:16]))
+	]
+	specialFrames = textures["specialFrames"][5:7]
+	specialFrames[1].fill((10, 0, 0), special_flags=BLEND_RGB_ADD)
+
+	sounds = sounds["hurt"]
+
 	hurtDistance = .6 * SIZING
 
-	def __init__(self, variant, xy, controls, textures, sounds):
-		self.variant = variant
-		self.x, self.y = xy
-		self.textures = textures["isaac"]
-
-		# Record import sounds and textures
-		self.heartTextures = textures["hearts"]
-		self.sounds = sounds["hurt"]
+	def __init__(self, controls):
+		self.x, self.y = get_center()
 
 		# Setup starting info
 		self.dead = False
@@ -45,18 +53,6 @@ class Character:
 		# Tears + hearts
 		self.tears = []
 		self.hearts = [UIHeart(0, 2) for _ in range(3)]
-
-		# Head, shoulders knees and toes, knees and toes!
-		self.heads = self.textures["heads"] + [transform.flip(self.textures["heads"][1], True, False)]
-		self.tearHeads = self.textures["tearHeads"] + [transform.flip(self.textures["tearHeads"][1], True, False)]
-		self.feet = [
-			self.textures["feet"][:8],
-			self.textures["feet"][8:16],
-			self.textures["feet"][:8],
-			list(map(lambda texture : transform.flip(texture, True, False), self.textures["feet"][8:16]))
-		]
-		self.specialFrames = self.textures["specialFrames"][5:7]
-		self.specialFrames[1].fill((10, 0, 0), special_flags=BLEND_RGB_ADD)
 
 		# The rect for the characters body
 		self.bodyRect = Rect(self.x-16*SIZING, self.y-16*SIZING, 32*SIZING, 32*SIZING)
@@ -326,9 +322,9 @@ class Character:
 			elif isinstance(obj, Heart):
 				amount = self.heal(obj.health, obj.variant)
 				if amount == 0:
-					self.hearts.append(UIHeart(obj.variant, obj.health, self.heartTextures))
+					self.hearts.append(UIHeart(obj.variant, obj.health))
 				elif type(amount) == int:
-					self.hearts.append(UIHeart(obj.variant, amount, self.heartTextures))
+					self.hearts.append(UIHeart(obj.variant, amount))
 				if obj.variant == 1:
 					self.specialFrame = 1
 			elif isinstance(obj, Pill):

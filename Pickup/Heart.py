@@ -34,11 +34,13 @@ class UIHeart:
 
 	# NOTE: After 6 hears, they go down a level on the GUI
 
+	textures = textures["hearts"]
+
 	def __init__(self, variant, health):
 		self.variant = variant
 		self.health = health
 		self.capacity = 2 # Maximum ammount of health per heart
-		self.textures = textures["hearts"][variant]
+		self.textures = self.textures[variant]
 
 	def damage(self, ammount):
 		# Damage is taken to this heart
