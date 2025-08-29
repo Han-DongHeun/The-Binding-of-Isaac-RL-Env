@@ -94,6 +94,9 @@ def make_graph(mapinfo):
         for i, j in product([-1, 0, 1], [-1, 0, 1]):
             if not (0 <= x + i < mapinfo['width']): continue
             if not (0 <= y + j < mapinfo['height']): continue
-            if (x+i,y+j) in obstacles: continue
-            graph[nodes[x][y]].append(nodes[x+i][y+j])
+            for ci, cj in [(i, 0), (0, j), (i, j)]:
+                if (x + ci, y + cj) in obstacles:
+                    break
+            else:
+                graph[nodes[x][y]].append(nodes[x+i][y+j])
     return graph, nodes
