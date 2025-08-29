@@ -63,6 +63,8 @@ class UIHeart:
 		return leftover # How many health points should carry over
 
 	def render(self, surface, index):
+		if not HUMAN_MODE:
+			return
 		# Render the heart to the display
 
 		surface.blit(self.textures[self.health], ((120 + 24 * index) * SIZING, 30 * SIZING))

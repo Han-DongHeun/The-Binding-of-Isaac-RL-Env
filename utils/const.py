@@ -21,4 +21,4 @@ GRIDY = (HEIGHT - GRATIO * 7) // 2
 
 SIZING = GRATIO / 52
 
-HUMAN_MODE = True
+HUMAN_MODE = False

@@ -4,8 +4,6 @@ from Room.Room import *
 from Pickup.Bomb import *
 from Pickup.TrollBomb import *
 
-import random
-
 import numpy as np
 
 import pygame
@@ -16,9 +14,8 @@ from utils.loadFloor import loadFloor
 class IsaacEnv:
     posMoves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
-    def __init__(self):
-        
-        pygame.init()
+    def __init__(self, play_mode=HUMAN_MODE):
+        self.play_mode = play_mode
         self.screen = pygame.Surface((WIDTH, HEIGHT))
 
         self.floor = loadFloor("basement")
@@ -28,10 +25,7 @@ class IsaacEnv:
         self.animatingRooms: list[Room] = []
 
         self.minimap = pygame.Surface((textures["map"]["background"].get_width(), textures["map"]["background"].get_height())).convert_alpha()
-        mWidth = self.minimap.get_width()
-        mHeight = self.minimap.get_height()
-        pad = 4 * SIZING
-        self.minimap.set_clip(pygame.Rect(pad, pad, mWidth - 3 * pad, mHeight - 3 * pad))
+        self.minimap.set_clip()
         self.minimap_rect = self.minimap.get_rect(topright=(WIDTH - GRIDX + GRATIO, GRIDY - GRATIO))
 
         self.updateFloor()
@@ -42,6 +36,8 @@ class IsaacEnv:
 
     def updateMinimap(self):
         # Draw the minimap
+        if not self.play_mode:
+            return
 
         self.minimap.fill((0,0,0,0))
         self.minimap.blit(textures["map"]["background"], (0, 0))
@@ -121,7 +117,8 @@ class IsaacEnv:
             self.moveNextRoom(move)
 
         # DRAW MAP
-        self.screen.blit(self.minimap, self.minimap_rect)
+        if self.play_mode:
+            self.screen.blit(self.minimap, self.minimap_rect)
 
         observations = pygame.surfarray.array3d(self.screen)
         terminated = self.isaac.dead

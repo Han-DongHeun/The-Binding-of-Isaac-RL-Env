@@ -35,3 +35,5 @@ class Game:
 			_, done = self.game.step(actions)
 
 			display.flip()
+
+			self.clock.tick(60)

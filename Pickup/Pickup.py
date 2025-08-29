@@ -77,6 +77,8 @@ class UIPickup:
 		return True
 
 	def render(self, surface):
+		if not HUMAN_MODE:
+			return 
 		# Blit icon, digit1, and digit 2
 		surface.blit(self.texture, (40 * SIZING, (88 + 24*self.idx) * SIZING))
 		surface.blit(self.digit1, (68 * SIZING, (94 + 24*self.idx) * SIZING))
