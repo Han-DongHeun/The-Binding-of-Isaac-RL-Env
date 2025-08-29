@@ -155,7 +155,7 @@
  </tile>
  <tile id="22" x="0" y="0" width="48" height="48">
   <properties>
-   <property name="name" value="Trite"/>
+   <property name="name" value="trite"/>
    <property name="type" value="enemy"/>
    <property name="variant" value="0"/>
   </properties>

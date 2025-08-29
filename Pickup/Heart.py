@@ -18,9 +18,9 @@ class Heart(Pickup):
 
 	health = 2
 
-	variant = 0
+	variant = 2 - health
 	sound = sounds["heartIntake"]
-	texture = textures["pickupHearts"][variant]
+	frames = textures["pickupHearts"][variant]
 
 class UIHeart:
 	"""Class for a UI heart"""

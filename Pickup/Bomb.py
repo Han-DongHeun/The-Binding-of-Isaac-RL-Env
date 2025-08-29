@@ -17,7 +17,7 @@ class Bomb(Pickup):
 	exploded = False
 	fuse = 2
 
-	texture = textures["bombs"]["bombs"]
+	frames = textures["bombs"]["bombs"]
 
 	def pickup(self):
 		self.pickedUp = True

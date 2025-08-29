@@ -14,5 +14,5 @@ class Key(Pickup):
 	"""Pickup Key class"""
 
 	variant = 0
-	texture = textures["keys"]
+	frames = textures["keys"]
 	sound = sounds["keyPickup"]

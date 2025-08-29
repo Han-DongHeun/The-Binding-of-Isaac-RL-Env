@@ -15,7 +15,7 @@ class Coin(Pickup):
 
 	variant = 0
 	coin_type = ("dime", "nickel", "penny")[variant]
-	texture = textures['coins'][coin_type][0]
+	frames = textures['coins'][coin_type]
 	sound = sounds["coinPickup"]
 
 	worth = (1, 5, 10)[variant]

@@ -27,12 +27,16 @@ class Pickup:
 	texture = None
 	sound = None
 
+	frames = []
+	current_frame = 0
+	interval_frame = 2
+
 	def __init__(self, gxy):
 		self.gx, self.gy = gxy
 
 		center_x, center_y = get_center(*gxy)
-		self.bounds = Rect(center_x - 8, center_y - 8, 16, 16)
-		self.rect = self.texture.get_rect(center=(center_x, center_y))
+		self.bounds = Rect(center_x - 8*SIZING, center_y - 8*SIZING, 16*SIZING, 16*SIZING)
+		self.rect = self.frames[0].get_rect(center=(center_x, center_y))
 
 	def pickup(self):
 		self.pickedUp = True
@@ -40,7 +44,12 @@ class Pickup:
 			self.sound.play()
 
 	def render(self, surface, ox=0, oy=0):
+		self.update()
 		surface.blit(self.texture, self.rect.move(ox, oy))
+
+	def update(self):
+		frame_idx = self.current_frame // self.interval_frame
+		self.texture = self.frames[frame_idx % len(self.frames)]
 	
 	""" def anim_render(self, surface, ox=0, oy=0):
 		frame_idx = self.current_frame // self.frame_interval % len(self.anim)

@@ -79,7 +79,7 @@ class Trite(Enemy):
 
         self.texture = self.frames[self.state][idx]
 
-        self.rect = self.texture.get_rect(center=(self.x, self.y - self.h))
+        self.texture_rect = self.texture.get_rect(center=(self.x, self.y - self.h))
 
         self.time += 1
         if self.time >= self.times[self.state]:

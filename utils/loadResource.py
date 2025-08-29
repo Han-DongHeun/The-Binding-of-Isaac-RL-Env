@@ -163,7 +163,7 @@ textures = {
 		name : loadTexture(name + '.png', (0, 0), (221, 143))
 		for name in ("basement", "catacombs", "caves", "depths", "necropolis", "shop", "utero", "womb")
     },
-    "poops": [loadTextures("poops.png", (0, variant * 32), (32, 32), (1, 5)) for variant in range(5)],
+    "poops": [list(reversed(loadTextures("poops.png", (0, variant * 32), (32, 32), (1, 5)))) for variant in range(5)],
     "rocks": {
 		"rock" : loadTextures("rocks.png", (0, 0), (32, 32), (1, 3)),
 		"broken" : loadTexture("rocks.png", (32 * 3, 0), (32, 32)),
@@ -172,7 +172,7 @@ textures = {
 
     # --- 아이템 및 픽업류 ---
     "bombs": {
-        "bombs": loadTexture("bombs.png", (0, 0), (32, 32)),
+        "bombs": [loadTexture("bombs.png", (0, 0), (32, 32))],
 		"explosion" : loadTextures("explosion.png", (0, 0), (96, 96), (3, 4)),
 		"smut" : loadTextures("smut.png", (0, 0), (96, 64), (3, 3))[:8],
     },

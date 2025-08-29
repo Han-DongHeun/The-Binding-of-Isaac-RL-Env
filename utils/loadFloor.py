@@ -40,7 +40,7 @@ def loadRoom(room_type='basement'):
             except:
                 pass
 
-        return datas
+    return datas
 
 def loadFloor(room_type='basement', size=10):
 

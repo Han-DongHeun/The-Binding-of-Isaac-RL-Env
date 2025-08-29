@@ -8,7 +8,7 @@ from utils.loadResource import textures, sounds
 class TrollBomb:
 
 	textures = textures["bombs"]
-	texture = textures["bombs"]
+	texture = textures["bombs"][0]
 	explode_texture = textures["smut"][randint(0, 3)]
 	anim = textures["explosion"]
 
