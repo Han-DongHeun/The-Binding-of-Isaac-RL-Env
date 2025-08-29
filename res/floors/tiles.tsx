@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="tiles" tilewidth="48" tileheight="48" tilecount="19" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="tiles" tilewidth="48" tileheight="48" tilecount="20" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2" x="0" y="0" width="32" height="32">
   <properties>
@@ -152,5 +152,13 @@
    <property name="variant" value="0"/>
   </properties>
   <image source="../textures/enemies/bigSpider.png" width="64" height="64"/>
+ </tile>
+ <tile id="22" x="0" y="0" width="48" height="48">
+  <properties>
+   <property name="name" value="Trite"/>
+   <property name="type" value="enemy"/>
+   <property name="variant" value="0"/>
+  </properties>
+  <image source="../textures/enemies/trite.png" width="192" height="144"/>
  </tile>
 </tileset>

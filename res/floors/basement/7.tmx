@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="13" height="7" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="1">
+ <editorsettings>
+  <export format="tmx"/>
+ </editorsettings>
+ <tileset firstgid="1" source="../tiles.tsx"/>
+ <layer id="3" name="Obstacle Layer" width="13" height="7">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgYwEyAP5B6aAUADlwAEw==
+  </data>
+ </layer>
+ <layer id="4" name="Enemy Layer" width="13" height="7">
+  <data encoding="base64" compression="zlib">
+   eJxjYBhZQGAA7QYACSwAEQ==
+  </data>
+ </layer>
+ <layer id="5" name="Pickup Layer" width="13" height="7">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgF9AIAAWwAAQ==
+  </data>
+ </layer>
+</map>

@@ -120,6 +120,8 @@ class IsaacEnv:
         if self.play_mode:
             self.screen.blit(self.minimap, self.minimap_rect)
 
+        n_of_bombs = self.isaac.pickups[1].score
+
         observations = pygame.surfarray.array3d(self.screen)
         terminated = self.isaac.dead
 
