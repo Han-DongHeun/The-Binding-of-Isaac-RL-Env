@@ -13,6 +13,7 @@ from random import *
 from Room.Door import *
 from Obstacle.Obstacle import Obstacle
 from Enemy.Enemy import Enemy
+from Enemy.Duke import Duke
 from Pickup.Pickup import Pickup
 
 import utils.func as func
@@ -35,8 +36,8 @@ class Room:
 
 	# ROOMS ARE 13 x 7
 
-	def __init__(self, floor, xy, objects, variant=0):
-		texture = textures["floors"][floor]
+	def __init__(self, room_type, xy, objects, variant=0):
+		texture = textures["floors"]["basement"]
 
 		w, h = texture.get_width(), texture.get_height()
 		backdrop = Surface((w * 2, h * 2))
@@ -63,7 +64,6 @@ class Room:
 		self.entered = False
 		self.seen = False
 
-		self.floor = floor
 		self.backdrop = backdrop
 		self.sounds = sounds
 		self.textures = textures
@@ -85,6 +85,8 @@ class Room:
 			controls = textures["controls"]
 			controls_rect = controls.get_rect(center=(self.backdrop_rect.width//2, self.backdrop_rect.height//2))
 			backdrop.blit(controls, controls_rect)
+		elif room_type == "boss":
+			self.enemies.append(Duke((6, 3)))
 		else:
 			self.generateObjects(objects)
 
@@ -104,8 +106,8 @@ class Room:
 				object_class = getattr(object_module, name)
 				repo.append(object_class((x, y)))
 
-	def addDoor(self, door_idx, variant):
-		self.doors.append(Door(self.floor, door_idx, variant, True, self.textures["doors"], self.sounds))
+	def addDoor(self, door_idx, door_type):
+		self.doors.append(Door(door_idx, door_type, True))
 
 	def animateOut(self, move):
 		# animate the room out

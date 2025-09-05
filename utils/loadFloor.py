@@ -76,13 +76,28 @@ def loadFloor(room_type='basement', size=10):
             current_rooms = next_rooms
             next_rooms = []
 
-    floor = {pos : Room(room_type, pos, loadRoom(room_type)) for pos in selected_rooms}
+    floor = {}
+    max_distance = -1
+    boss_pos = None
+    for pos in end_rooms:
+        d = sum(map(abs, pos))
+        if max_distance < d:
+            max_distance = d
+            boss_pos = pos
+    floor[boss_pos] = Room("boss", boss_pos, loadRoom())
+
+    for pos in selected_rooms:
+        if pos not in floor:
+            floor[pos] = Room(room_type, pos, loadRoom())
 
     moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    for (x, y), room in floor.items():
+    for pos, room in floor.items():
+        x, y = pos
         for i, (dx, dy) in enumerate(moves):
-            if (x + dx, y + dy) in floor:
-                room.addDoor(i, room.variant)
+            next_pos = (x + dx, y + dy)
+            if next_pos in floor:
+                door_type = "door" if pos != boss_pos and next_pos != boss_pos else "boss_door"
+                room.addDoor(i, door_type)
 
     return floor
 

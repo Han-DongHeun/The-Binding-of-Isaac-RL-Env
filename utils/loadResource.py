@@ -16,7 +16,7 @@ def darken(image, amount):
 
     return darkened_image
 
-@lru_cache(maxsize=16)
+@lru_cache(maxsize=64)
 def loadImage(path):
 	full_path = os.path.join('res', 'textures', *path.split('/'))
 	texture = image.load(full_path).convert_alpha()
@@ -35,7 +35,7 @@ def loadTexture(path, topleft=(0, 0), cell_size=None, scale_factor=SIZING*2):
 
 	return texture
 
-@lru_cache(maxsize=16)
+@lru_cache(maxsize=64)
 def loadTextures(path, topleft, cell_size, grid_size, scale_factor=SIZING*2):
 	spritesheet = loadImage(path)
 
@@ -116,6 +116,16 @@ def resizing(textures, rate=SIZING):
 		return [resizing(texture, rate) for texture in textures]
 	elif isinstance(textures, dict):
 		return {name : resizing(texture, rate) for name, texture in textures.items()}
+	
+def cutting(textures, width=None, height=None):
+	if isinstance(textures, Surface):
+		width = width if width != None else textures.get_width()
+		height = height if height != None else textures.get_height()
+		return textures.subsurface(0, 0 (width, height))
+	elif isinstance(textures, list):
+		return [cutting(texture, height, width) for texture in textures]
+	elif isinstance(textures, dict):
+		return {name : cutting(texture, height, width) for name, texture in textures.items()}
 
 # Load all needed textures
 textures = {

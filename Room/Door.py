@@ -7,8 +7,8 @@
 
 from pygame import *
 from utils.const import *
+from utils.loadResource import textures, sounds
 
-import utils.func as func
 
 class Door:
 	"""The main door class"""
@@ -24,30 +24,26 @@ class Door:
 
 	# ROOMS ARE 13 x 7
 
-	def __init__(self, floor, side, variant, isOpen, texture, sounds):
+	textures = textures["doors"]
+	sounds = sounds
+
+	def __init__(self, side, door_type, isOpen):
 		self.side = side
-		self.variant = variant
 		self.locked = False
 
 		# Bash textures
-		self.texture = texture["door"]
+		self.texture = self.textures[door_type]
 		
 		# Darken the door a little
 		self.sounds = sounds
 
 		self.isOpen = isOpen
 
-		# Ensure the door is the correct type
-		if variant != 3 and variant != 4:
-			# Rotate the door texture to be the correct orrientation
-			self.doorFrame  = transform.rotate(self.texture["doorFrame"], -(180 - (90*self.side)))
-			self.doorBack   = transform.rotate(self.texture["doorBack"], -(180 - (90*self.side)))
-			self.lDoor      = transform.rotate(self.texture["lDoor"], -(180 - (90*self.side)))
-			self.rDoor      = transform.rotate(self.texture["rDoor"], -(180 - (90*self.side)))
-			self.lockedDoor = transform.rotate(self.texture["lockedDoor"], -(180 - (90*self.side)))
-
-		else:
-			pass #미구현
+		self.doorFrame  = transform.rotate(self.texture["doorFrame"], -(180 - (90*self.side)))
+		self.doorBack   = transform.rotate(self.texture["doorBack"], -(180 - (90*self.side)))
+		self.lDoor      = transform.rotate(self.texture["lDoor"], -(180 - (90*self.side)))
+		self.rDoor      = transform.rotate(self.texture["rDoor"], -(180 - (90*self.side)))
+		self.lockedDoor = transform.rotate(self.texture["lockedDoor"], -(180 - (90*self.side)))
 
 		# Change x and y based on side
 		self.x1 = [0, 7, 0, -7][self.side]
