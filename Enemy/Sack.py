@@ -1,5 +1,5 @@
 from Enemy.Enemy import *
-from random import choice
+from Enemy.Spider import Spider
 
 class Sack(Enemy):
     
@@ -9,6 +9,16 @@ class Sack(Enemy):
     interval_frame = 60
     frames = textures["enemies"]["sack"]
 
+    spawn_timer = max_spawn_timer = 120
+
+    def __init__(self, xy):
+        self.spiders = []
+        super().__init__(xy)
+
+    def spawn(self):
+        xy = self.randomPathFind()[0]
+        self.spiders.append(Spider(xy))
+
     def move(self, *args):
         pass
 
@@ -17,6 +27,35 @@ class Sack(Enemy):
 
     def checkTear(self):
         pass
+
+    def render(self, surface, character, nodes, paths, bounds, obsticals):
+
+        for spider in self.spiders[:]:
+            if not spider.render(surface, character, nodes, paths, bounds, obsticals):
+                self.spiders.remove(spider)
+        
+        if self.dead:
+            return len(self.spiders) > 0
+
+        self.cx, self.cy = character.x, character.y
+
+        if self.health == self.max_health:
+            if self.spawn_timer == 0:
+                self.spawn()
+                self.spawn_timer = self.max_spawn_timer
+            else:
+                self.spawn_timer -= 1
+        else:
+            self.spawn_timer = self.max_spawn_timer
+
+        self.checkHurt(character)
+
+        self.update()
+        surface.blit(self.texture, self.texture_rect)
+
+        self.current_frame += 1
+
+        return True
 
     def update(self):
         if self.current_frame % self.interval_frame == 0:
