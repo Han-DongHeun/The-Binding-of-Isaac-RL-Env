@@ -73,11 +73,17 @@ class Duke(Enemy):
 		if not self.dead:
 			self.move(bounds)
 			self.checkHurt(character)
+			
+			cond1 = sum(fly.orbitting for fly in self.flies) >= 4
+			cond2 = len(self.flies) <= 9
+
+			if not (cond1 or cond2):
+				self.cool_timer = max(self.cool_time - 50, self.cool_timer)
 
 			if self.cool_timer == 0:
-				if sum(fly.orbitting for fly in self.flies) >= 4:
+				if cond1:
 					self.pushbackFlies()
-				elif len(self.flies) <= 9:
+				elif cond2:
 					self.spawnFlies()
 				self.cool_timer = self.cool_time
 			
@@ -95,7 +101,7 @@ class Duke(Enemy):
 	def update(self):
 		if self.cool_timer < 50:
 			frame_idx = 3
-		elif self.cool_timer < self.cool_time - 50:
+		elif self.cool_timer <= self.cool_time - 50:
 			frame_idx = 2
 		else:
 			frame_idx = self.frame_idx
@@ -141,13 +147,13 @@ class SpawnedFly(AttackFly):
 		self.y += self.dy
 
 		if self.x < self.map_bounds.left:
-			self.xVel += 0.5
-		if self.x > self.map_bounds.right:
-			self.xVel -= 0.5
-		if self.y < self.map_bounds.top:
-			self.yVel += 0.5
-		if self.y > self.map_bounds.bottom:
-			self.yVel -= 0.5
+			self.xVel += 5
+		elif self.x > self.map_bounds.right:
+			self.xVel -= 5
+		elif self.y < self.map_bounds.top:
+			self.yVel += 5
+		elif self.y > self.map_bounds.bottom:
+			self.yVel -= 5
 
 		self.xVel *= 0.95
 		self.yVel *= 0.95

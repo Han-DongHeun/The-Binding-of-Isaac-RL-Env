@@ -102,7 +102,7 @@ class IsaacEnv:
         actions = actions.tolist()
         self.isaac.moving(dict(enumerate(actions[:8])))
         if actions[8] and self.isaac.pickups[1].use(1):
-            self.floor[self.currentRoom].other.append(TrollBomb(self.floor[self.currentRoom], 0, get_grid_coord(self.isaac.x, self.isaac.y), self.isaac))
+            self.floor[self.currentRoom].other.append(TrollBomb(self.floor[self.currentRoom], get_grid_coord(self.isaac.x, self.isaac.y), self.isaac))
 
         # Draw animating rooms (The ones that are shifting in and out of frame)
         if len(self.animatingRooms) > 0:
